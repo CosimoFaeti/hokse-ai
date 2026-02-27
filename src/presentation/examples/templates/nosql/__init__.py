@@ -1,0 +1,1 @@
+"""``templates`` related NoSQL examples"""
