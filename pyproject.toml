@@ -1,7 +1,7 @@
 [project]
-name = "python-api-template"
+name = "hokse-ai"
 version = "0.1.0"
-description = "A Python template for an API application, using clean architecture principles when possible."
+description = ""
 requires-python = "==3.12.*"
 readme = "README.md"
 
@@ -11,27 +11,22 @@ dependencies = [
     "httpx==0.27.0",
     "pydantic==2.9.2",
     "dependency-injector==4.46.0",
-
     # Presentation
     "fastapi==0.115.4",
     "uvicorn==0.32.0",
-
     # Persistence
     "sqlalchemy==2.0.36",
-    "sqlmodel==0.0.22",     # if using Postgres
+    "sqlmodel==0.0.22", # if using Postgres
     "psycopg2-binary==2.9.10",
     "asyncio==3.4.3",
     "asyncpg==0.30.0",
-    "qdrant-client==1.12.1",    # if using Qdrant
-    "beanie==1.27.0",   # if using MongoDB
-    "neomodel==5.4.2",  # if using Neo4J
-
+    "qdrant-client==1.12.1", # if using Qdrant
+    "beanie==1.27.0", # if using MongoDB
+    "neomodel==5.4.2", # if using Neo4J
     # Infrastructure
-    "redis==5.2.0",  # if using Redis
-
+    "redis==5.2.0", # if using Redis
     # Domain
     "pydantic-settings==2.6.1",
-
     # Infrastructure
     "pyjwt==2.9.0",
     "instructor==1.7.0",
@@ -41,13 +36,14 @@ dependencies = [
     "langchain-community==0.3.3",
     "langchain-qdrant==0.1.4",
     "pypdf==4.3.1",
-
     # Code linting, formatting and static analysis
     "ruff==0.7.2",
     "mypy==1.13.0",
-
     # Docs
-    "sphinx==8.1.3"
+    "sphinx==8.1.3",
+    "datetime>=6.0",
+    "ipykernel>=7.2.0",
+    "stravalib>=2.4",
 ]
 
 

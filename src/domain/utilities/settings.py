@@ -45,86 +45,35 @@ class Settings(BaseSettings):
 
 	# endregion
 
-	# region VECTOR_DB
-
-	VECTOR_DB_HOST: str | None = Field(
-		title="VECTOR_DB_HOST", description="Host on which the vector database is deployed.", default=None
-	)
-
-	VECTOR_DB_PORT: str | None = Field(
-		title="VECTOR_DB_PORT", description="Port on which the vector database is exposed.", default=None
-	)
-
-	VECTOR_DB_APIKEY: SecretStr = Field(
-		title="VECTOR_DB_APIKEY", description="Api key for accessing vector database.", default=None
-	)
-
-	VECTOR_DB_COLLECTION_NAME: str | None = Field(
-		title="VECTOR_DB_COLLECTION_NAME",
-		description="Name of the collection used in the vector database.",
-		default=None,
-	)
-
-	# endregion
-
-	# region KEY_VALUE_DB
-
-	REDIS_DB_HOST: str = Field(
-		title="REDIS_DB_HOST", description="Host on which the Redis database is deployed."
-	)
-
-	REDIS_DB_USER: str = Field(
-		title="REDIS_DB_USER", description="Username for accessing Redis database."
-	)
-
-	REDIS_DB_PASSWORD: SecretStr = Field(
-		title="REDIS_DB_PASSWORD", description="Password for accessing Redis database."
-	)
-
-	REDIS_DB_PORT: int = Field(
-		title="REDIS_DB_PORT", description="Port on which the Redis database is exposed."
-	)
-
-	REDIS_DB_NAME: int = Field(
-		title="REDIS_DB_NAME", description="Name of the relational database."
-	)
-
-	# endregion
-
-	# region NOSQL
-
-	NOSQL_DB_HOST: str | None = Field()
-
-	NOSQL_DB_PORT: int | None = Field()
-
-	NOSQL_DB_USER: str | None = Field()
-
-	NOSQL_DB_PASSWORD: SecretStr = Field()
-
-	NOSQL_DB_NAME: str | None = Field()
-
-	# endregion
-
-	# region GRAPH
-
-	GRAPH_DB_HOST: str | None = Field()
-	GRAPH_DB_PORT: int = Field()
-	GRAPH_DB_USER: str = Field()
-	GRAPH_DB_PASSWORD: SecretStr = Field()
-
-	# endregion
-
 	# region AI
 
-	EMBEDDER_HOST: str | None = Field(
-		title="EMBEDDER_HOST", description="Host on which the embedder is deployed.", default=None
+	GOOGLE_API_KEY: str | None = Field(
+		title="GOOGLE_API_KEY", description="Client key for accessing Google API.", default=None
 	)
 
-	EMBEDDER_PORT: int | None = Field(
-		title="EMBEDDER_PORT", description="Port on which the embedder is exposed.", default=None
+	GEMINI_MODEL: str | None = Field(
+		title="GEMINI_MODEL", description="Model for accessing Google API.", default=None
 	)
 
-	EMBEDDER_NAME: str | None = Field(title="EMBEDDER_NAME", description="Name of the embedder.", default=None)
+	# endregion
+
+	# region STRAVA
+
+	STRAVA_CLIENT_ID: str | None = Field(
+		title="STRAVA_CLIENT_ID", description="Client id for accessing Strava API.", default=None
+	)
+
+	STRAVA_CLIENT_SECRET: str | None = Field(
+		title="STRAVA_CLIENT_SECRET", description="Client secret for accessing Strava API.", default=None
+	)
+
+	STRAVA_OAUTH_URL: str | None = Field(
+		title="STRAVA_OAUTH_URL", description="OAuth url for accessing Strava API.", default=None
+	)
+
+	STRAVA_API_URL: str | None = Field(
+		title="STRAVA_API_URL", description="Base URL for accessing Strava API.", default=None
+	)
 
 	# endregion
 

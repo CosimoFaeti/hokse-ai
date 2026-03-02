@@ -1,12 +1,13 @@
 from contextlib import asynccontextmanager
+from sqlalchemy import URL
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
+
 from src.domain.utilities.logger import logger
 from src.domain.utilities.settings import SETTINGS
 from src.domain.utilities.singleton import Singleton
-from sqlalchemy import URL
 
 
 class SQLDatabaseManager(metaclass=Singleton):
@@ -58,7 +59,6 @@ class SQLDatabaseManager(metaclass=Singleton):
 		:return: an SQL database asynchronous session.
 		:rtype: AsyncSession
 		"""
-
 		logger.info(msg="Start")
 
 		async_session = AsyncSession(self.engine)
@@ -75,8 +75,11 @@ class SQLDatabaseManager(metaclass=Singleton):
 		:return: an SQL database asynchronous session.
 		:rtype: AsyncSession
 		"""
+
 		logger.info(msg="Start")
+
 		async_session = sessionmaker(bind=self.engine, class_=AsyncSession, expire_on_commit=False)
+
 		async with async_session() as session:
 			logger.info(msg="End")
 			yield session

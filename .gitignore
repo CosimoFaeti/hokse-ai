@@ -7,3 +7,5 @@ qdrant_data
 redis_data
 uv.lock
 .idea
+.env
+script.ipynb
