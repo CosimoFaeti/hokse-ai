@@ -9,19 +9,13 @@ from dependencies import get_sql_template_service, get_nosql_template_service, g
 	get_vector_template_service
 from src.domain.utilities.logger import logger
 from src.domain.utilities.settings import SETTINGS
-from src.infrastructure.clients.langchain_client import LangchainClient
-from src.infrastructure.clients.redis_client import RedisClient
-from src.persistence.managers.graph_database_manager import GraphDatabaseManager
-from src.persistence.managers.nosql_database_manager import NoSQLDatabaseManager
+from src.infrastructure.clients.agent_client import AgentClient
+from src.infrastructure.clients.strava_client import StravaClient
 from src.persistence.managers.sql_database_manager import SQLDatabaseManager
-from src.persistence.managers.vector_db_database_manager import VectorDBDatabaseManager
 from src.presentation.endpoints.health.health_endpoints import health_router
-from src.presentation.endpoints.templates.graph_template_endpoints import graph_template_router
-from src.presentation.endpoints.templates.sql_template_endpoints import sql_template_router
-from src.presentation.endpoints.templates.nosql_template_endpoints import nosql_template_router
-from src.presentation.endpoints.templates.vector_template_endpoints import vector_template_router
+from src.presentation.endpoints.authentication.auth_endpoints import auth_router
+from src.presentation.endpoints.chats.chats_endpoints import chats_router
 
-# TODO it is incorrect to directly call persistence (?)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	"""
@@ -30,38 +24,20 @@ async def lifespan(app: FastAPI):
 	:param FastAPI app: FastAPI app to
 	"""
 
-	# TODO evaluate if moving these lines into the init of persistence or infrastructure and simply import them here
-
 	# Initialize SQL database connection and create tables
 	logger.info(msg="Initializing SQL database connection.")
 	await SQLDatabaseManager().create_tables()
 	logger.info(msg="SQL database connection correctly initialized.")
 
-	# Initialize NoSQL database connection and create tables
-	logger.info(msg="Initializing NoSQL database connection.")
-	await NoSQLDatabaseManager().create_collections()
-	logger.info(msg="NoSQL database connection correctly initialized.")
+	# Initialize Strava connection
+	logger.info(msg="Initializing Strava connection.")
+	StravaClient()
+	logger.info(msg="Strava connection correctly initialized.")
 
-	# Initialize Vector database connection
-	logger.info(msg="Initializing Vector database connection.")
-	VectorDBDatabaseManager().health_check()
-	await VectorDBDatabaseManager().create_collection(collection_name=SETTINGS.VECTOR_DB_COLLECTION_NAME)
-	logger.info(msg="Vector database connection correctly initialized.")
-
-	# Initialize Graph database connection
-	logger.info(msg="Initializing Graph database connection.")
-	GraphDatabaseManager()
-	logger.info(msg="Graph database connection correctly initialized.")
-
-	# Initialize Redis connection
-	logger.info(msg="Initializing Redis connection.")
-	RedisClient()
-	logger.info(msg="Redisconnection correctly initialized.")
-
-	# Initialize Langchain agent
-	logger.info(msg="Initializing Langchain agent.")
-	LangchainClient()
-	logger.info(msg="Langchain agent correctly initialized.")
+	# Initialize Agent
+	logger.info(msg="Initializing Agent.")
+	AgentClient()
+	logger.info(msg="Agent correctly initialized.")
 
 	logger.info(msg="App is now ready to manage requests.")
 
@@ -70,26 +46,17 @@ async def lifespan(app: FastAPI):
 container = Container()
 
 app = FastAPI(
-	title="Python API Template",
-	summary="This is a template backend written in Python.",
+	title="Hokse-ai",
+	summary="This is hokse-ai.",
 	description="The swagger offers the possibility to perform simple CRUD operations.",
 	docs_url="/docs",
 	version="1.0",
 	lifespan=lifespan,
 )
-
-# override dependencies
-app.dependency_overrides[get_sql_template_service] = lambda: container.sql_template_service()
-app.dependency_overrides[get_nosql_template_service] = lambda: container.nosql_template_repository()
-app.dependency_overrides[get_graph_template_service] = lambda: container.graph_template_service()
-app.dependency_overrides[get_vector_template_service] = lambda: container.vector_template_service()
-
 # Include endpoints routers
 app.include_router(router=health_router)
-app.include_router(router=sql_template_router)
-app.include_router(router=nosql_template_router)
-app.include_router(router=vector_template_router)
-app.include_router(router=graph_template_router)
+app.include_router(router=auth_router)
+app.include_router(router=chats_router)
 
 app.add_middleware(
 	CORSMiddleware,
