@@ -5,12 +5,8 @@ from pydantic import BaseModel, Field
 from enum import StrEnum
 
 
-class Activity(BaseModel):
+class ActivityEntity(BaseModel):
     """ Represents an activity """
-
-    id: int = Field(
-        title="id", description="Unique ID for activity."
-    )
 
     athlete_id: int = Field(
         title="athlete_id", description="Unique ID for athlete."
@@ -18,6 +14,10 @@ class Activity(BaseModel):
 
     name: str | None = Field(
         title="name", description="Name of the activity."
+    )
+
+    sport_type: str | None = Field(
+        title="sport_type", description="Type of sport of the activity.", default="Run"
     )
 
     distance: float | None = Field(
@@ -44,25 +44,21 @@ class Activity(BaseModel):
         title="elev_low", description="Lowest elevation of the activity, in meters."
     )
 
-    sport_type: str | None = Field(
-        title="sport_type", description="Type of sport of the activity."
-    )
-
     start_date: datetime | None = Field(
         title="start_date", description="The time at which the activity was started."
     )
 
-class SportType(StrEnum):
-    """Represents sport type"""
-    RUN = "Run"
-    RIDE = "Ride"
-    SWIM = "Swim"
-    WALK = "Walk"
-    HIKE = "Hike"
-    WORKOUT = "Workout"
-    OTHER = "Other"
+    @property
+    def distance_km(self) -> float:
+        return round(self.distance / 1000, 2)
 
+    @property
+    def moving_time_minutes(self) -> float:
+        return round(self.moving_time / 60, 1)
 
-
-
-    # TODO
+    @property
+    def pace_min_per_km(self) -> float | None:
+        if self.distance == 0:
+            return None
+        pace_sec = self.moving_time / (self.distance / 1000)
+        return round(pace_sec / 60, 2)
