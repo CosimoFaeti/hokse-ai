@@ -2,6 +2,7 @@ import jsonpatch
 
 from pydantic import UUID4
 from beanie.exceptions import DocumentNotFound
+from datetime import timezone
 
 from src.domain.entities.strava_token_entity import StravaTokenEntity
 from src.domain.entities.patch_entity import PatchEntity
@@ -18,20 +19,26 @@ class StravaTokenRepository:
 	# region GET
 	@exception_handler
 	@staticmethod
-	async def get(id: UUID4) -> Result[StravaTokenEntity]:
+	async def get(athlete_id: int | None) -> Result[StravaTokenEntity]:
 		""""""
 
 		logger.info(msg="Start")
 
-		result = await StravaToken.get(docuemnt_id=id)
+		result = await StravaToken.find_one(StravaToken.athlete_id == athlete_id)
 
 		if result is None:
-			logger.error(msg=f"Entry of type strava token with key={id} does not exist.")
-			return Result.fail(error=GenericErrors.not_found_error(type="strava_token", key=id))
+			logger.error(msg=f"Entry of type strava token with key={athlete_id} does not exist.")
+			return Result.fail(error=GenericErrors.not_found_error(type="strava_token", key=athlete_id))
 
 		logger.info(msg="End")
 
-		strava_token: StravaTokenEntity = StravaTokenEntity(**result.model_dump())
+		strava_token: StravaTokenEntity = StravaTokenEntity(
+			athlete_id=result.athlete_id,
+			access_token=result.access_token,
+			refresh_token=result.refresh_token,
+			expires_at=result.expires_at.replace(tzinfo=timezone.utc),
+			scope=result.scope,
+		)
 
 		return Result.ok(value=strava_token)
 	# endregion
@@ -56,16 +63,16 @@ class StravaTokenRepository:
 	# region DELETE
 	@exception_handler
 	@staticmethod
-	async def delete(id: UUID4) -> Result[StravaTokenEntity]:
+	async def delete(athlete_id: int | None) -> Result[StravaTokenEntity]:
 		""""""
 
 		logger.info(msg="Start")
 
-		result = await StravaToken.get(docuemnt_id=id)
+		result = await StravaToken.find_one(StravaToken.athlete_id == athlete_id)
 
 		if result is None:
-			logger.error(msg=f"Entry of type strava token with key={id} does not exist.")
-			return Result.fail(error=GenericErrors.not_found_error(type="strava_token", key=id))
+			logger.error(msg=f"Entry of type strava token with key={athlete_id} does not exist.")
+			return Result.fail(error=GenericErrors.not_found_error(type="strava_token", key=athlete_id))
 
 		await result.delete()
 

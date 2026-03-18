@@ -8,7 +8,7 @@ from enum import StrEnum
 class ActivityEntity(BaseModel):
     """ Represents an activity """
 
-    athlete_id: int = Field(
+    athlete_id: int | None = Field(
         title="athlete_id", description="Unique ID for athlete."
     )
 

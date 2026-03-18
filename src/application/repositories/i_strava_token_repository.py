@@ -9,7 +9,7 @@ class IStravaTokenRepository(ABC):
     # region GET
     @staticmethod
     @abstractmethod
-    async def get(id: UUID4) -> Result[StravaTokenEntity]:
+    async def get(athlete_id: str) -> Result[StravaTokenEntity]:
         # TODO: id should be athlete_id, think about changing name or data type
         pass
     # endregion
@@ -24,6 +24,6 @@ class IStravaTokenRepository(ABC):
     # region DELETE
     @staticmethod
     @abstractmethod
-    async def delete(id: UUID4) -> Result[StravaTokenEntity]:
+    async def delete(athlete_id: str) -> Result[StravaTokenEntity]:
         pass
     # endregion

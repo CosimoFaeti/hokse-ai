@@ -10,7 +10,7 @@ class IActivityRepository(ABC):
     # region GET
     @staticmethod
     @abstractmethod
-    async def get(id: UUID4, sport_type: str | None = None, limit: int = 10, start: str | None = None, end: str | None = None) -> Result[list[ActivityEntity]]:
+    async def get(athlete_id: str, sport_type: str | None = None, limit: int = 10, start: str | None = None, end: str | None = None) -> Result[list[ActivityEntity]]:
         pass
     # endregion
 

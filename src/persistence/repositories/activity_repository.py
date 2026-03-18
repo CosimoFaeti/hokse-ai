@@ -1,5 +1,6 @@
 import jsonpatch
 
+from datetime import datetime
 from pydantic import UUID4
 from beanie.exceptions import DocumentNotFound
 
@@ -11,8 +12,6 @@ from src.domain.utilities.exception_handler import exception_handler
 from src.domain.utilities.logger import logger
 from src.persistence.objects.nosql_activity import Activity
 
-# TODO: Refactor all ActivityRepository
-
 
 class ActivityRepository:
     """Repository to perform operations on activity NoSQL collection."""
@@ -20,22 +19,35 @@ class ActivityRepository:
     # region GET
     @exception_handler
     @staticmethod
-    async def get(id: UUID4, sport_type: str | None = None, limit: int = 10, start: str | None = None, end: str | None = None) -> Result[list[ActivityEntity]]:
+    async def get(athlete_id: int | None, sport_type: str | None = None, limit: int = 10, start: str | None = None, end: str | None = None) -> Result[list[ActivityEntity]]:
         """"""
 
         logger.info(msg="Start")
 
-        result = await StravaToken.get(docuemnt_id=id)
+        result = Activity.find(Activity.athlete_id == athlete_id)
+
+        if sport_type:
+            result = result.find(Activity.sport_type == sport_type)
+
+        if start and end:
+            start_dt = datetime.fromisoformat(start)
+            end_dt = datetime.fromisoformat(end)
+            result = result.find(
+                Activity.start_date >= start_dt,
+                Activity.start_date <= end_dt,
+            )
 
         if result is None:
-            logger.error(msg=f"Entry of type strava token with key={id} does not exist.")
-            return Result.fail(error=GenericErrors.not_found_error(type="strava_token", key=id))
+            logger.error(msg=f"Entry of type activity with key={athlete_id} does not exist.")
+            return Result.fail(error=GenericErrors.not_found_error(type="activity", key=athlete_id))
 
         logger.info(msg="End")
 
-        strava_token: StravaTokenEntity = StravaTokenEntity(**result.model_dump())
+        docs = await result.sort(-Activity.start_date).limit(limit).to_list()
 
-        return Result.ok(value=strava_token)
+        activities: list[ActivityEntity] = [ActivityEntity(**doc.model_dump()) for doc in docs]
+
+        return Result.ok(value=activities)
 
     # endregion
 
@@ -47,12 +59,12 @@ class ActivityRepository:
 
         logger.info(msg="Start")
 
-        nosql_strava_token: StravaToken = StravaToken(**entity.model_dump())
+        docs = [Activity(**activity.model_dump()) for activity in activities]
 
-        await nosql_strava_token.insert()
+        await Activity.insert_many(docs)
 
         logger.info(msg="End")
 
-        return Result.ok(value=entity)
+        return Result.ok(value=activities)
 
     # endregion
