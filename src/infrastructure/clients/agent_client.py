@@ -41,12 +41,15 @@ class AgentClient(metaclass=Singleton):
 
         generation_time: float = time.time() - generation_start_time
 
-        # TODO
-
         chat_entity: ChatEntity = ChatEntity(
             id=str(uuid.uuid4()),
-
+            message=result_state["messages"][-1].content,
+            generation_time=generation_time,
         )
+
+        logger.info(msg="End")
+
+        return Result.ok(value=chat_entity)
 
 
 
