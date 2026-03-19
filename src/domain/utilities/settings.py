@@ -40,12 +40,19 @@ class Settings(BaseSettings):
 
 	# region AI
 
-	GOOGLE_API_KEY: str | None = Field(
-		title="GOOGLE_API_KEY", description="Client key for accessing Google API.", default=None
+	LLM_PROVIDER: str = Field(
+		title="LLM_PROVIDER", description="Provider for LLM API.", default="google"
 	)
 
-	GEMINI_MODEL: str | None = Field(
-		title="GEMINI_MODEL", description="Model for accessing Google API.", default=None
+	LLM_MODEL: str = Field(
+		title="LLM_MODEL", description="Model for accessing LLM API.", default="")
+
+	LLM_API_KEY: str | None = Field(
+		title="LLM_API_KEY", description="API key for LLM API.", default=None
+	)
+
+	LLM_BASE_URL: str | None = Field(
+		title="LLM_BASE_URL", description="Base URL for LLM API.", default=None
 	)
 
 	# endregion
