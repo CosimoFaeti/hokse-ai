@@ -46,18 +46,18 @@ class StravaTokenRepository:
 	# region POST
 	@exception_handler
 	@staticmethod
-	async def post(entity: StravaTokenEntity) -> Result[StravaTokenEntity]:
+	async def post(token: StravaTokenEntity) -> Result[StravaTokenEntity]:
 		""""""
 
 		logger.info(msg="Start")
 
-		nosql_strava_token: StravaToken = StravaToken(**entity.model_dump())
+		nosql_strava_token: StravaToken = StravaToken(**token.model_dump())
 
 		await nosql_strava_token.insert()
 
 		logger.info(msg="End")
 
-		return Result.ok(value=entity)
+		return Result.ok(value=token)
 	# endregion
 
 	# region DELETE

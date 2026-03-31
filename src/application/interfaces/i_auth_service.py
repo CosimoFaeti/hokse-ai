@@ -1,28 +1,28 @@
 from abc import ABC, abstractmethod
-from pydantic import UUID4
 
 from src.domain.entities.strava_token_entity import StravaTokenEntity
 from src.domain.results.result import Result
 
-class IStravaTokenRepository(ABC):
 
-    # region GET
-    @staticmethod
-    @abstractmethod
-    async def get(athlete_id: int | None) -> Result[StravaTokenEntity]:
-        pass
-    # endregion
+class IAuthService(ABC):
 
     # region POST
     @staticmethod
     @abstractmethod
-    async def post(token: StravaTokenEntity) -> Result[StravaTokenEntity]:
+    async def exchange_code(code: str) -> Result[StravaTokenEntity]:
+        pass
+    # endregion
+
+    # region GET
+    @staticmethod
+    @abstractmethod
+    async def get_valid_token(athlete_id: int) -> Result[StravaTokenEntity]:
         pass
     # endregion
 
     # region DELETE
     @staticmethod
     @abstractmethod
-    async def delete(athlete_id: str) -> Result[StravaTokenEntity]:
+    async def revoke(athlete_id: int) -> Result[StravaTokenEntity]:
         pass
     # endregion

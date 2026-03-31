@@ -44,6 +44,10 @@ class ActivityEntity(BaseModel):
         title="elev_low", description="Lowest elevation of the activity, in meters."
     )
 
+    average_heartrate: float | None = Field(
+        title="average_heartrate", description="Average heartrate of the activity."
+    )
+
     start_date: datetime | None = Field(
         title="start_date", description="The time at which the activity was started."
     )

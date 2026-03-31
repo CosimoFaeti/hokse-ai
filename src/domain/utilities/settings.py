@@ -79,7 +79,7 @@ class Settings(BaseSettings):
 		title="STRAVA_API_URL", description="Base URL for accessing Strava API.", default=None
 	)
 
-	STRAVA_REDIRECT_URL: str | None = Field(
+	STRAVA_REDIRECT_URI: str | None = Field(
 		title="STRAVA_REDIRECT_URL", description="Redirect url for accessing Strava API.", default=None
 	)
 

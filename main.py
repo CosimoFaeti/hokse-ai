@@ -10,32 +10,26 @@ from dependencies import get_sql_template_service, get_nosql_template_service, g
 from src.domain.utilities.logger import logger
 from src.domain.utilities.settings import SETTINGS
 from src.infrastructure.clients.agent_client import AgentClient
-from src.infrastructure.clients.strava_client import StravaClient
-from src.persistence.managers.sql_database_manager import SQLDatabaseManager
+from src.persistence.managers.nosql_database_manager import NoSQLDatabaseManager
 from src.presentation.endpoints.health.health_endpoints import health_router
 from src.presentation.endpoints.authentication.auth_endpoints import auth_router
-from src.presentation.endpoints.chats.chats_endpoints import chats_router
+from src.presentation.endpoints.chats.agent_endpoints import chats_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	"""
-	Define startup and cleanup operations for a FastAPI app.
+	Define startup and cleanup operations for Hokse-ai app.
 
 	:param FastAPI app: FastAPI app to
 	"""
 
-	# Initialize SQL database connection and create tables
-	logger.info(msg="Initializing SQL database connection.")
-	await SQLDatabaseManager().create_tables()
-	logger.info(msg="SQL database connection correctly initialized.")
-
-	# Initialize Strava connection
-	logger.info(msg="Initializing Strava connection.")
-	StravaClient()
-	logger.info(msg="Strava connection correctly initialized.")
+	# Initialize NoSQL database connection and create tables
+	logger.info(msg="Initializing NoSQL database connection.")
+	await NoSQLDatabaseManager().create_collections()
+	logger.info(msg="NoSQL database connection correctly initialized.")
 
 	# Initialize Agent
-	logger.info(msg="Initializing Agent.")
+	logger.info(msg="Initializing LangGraph agent.")
 	AgentClient()
 	logger.info(msg="Agent correctly initialized.")
 
@@ -43,14 +37,14 @@ async def lifespan(app: FastAPI):
 
 	yield
 
-container = Container()
+#container = Container()
 
 app = FastAPI(
 	title="Hokse-ai",
-	summary="This is hokse-ai.",
+	summary="An AI-powered personal training coach that analyses your Strava data.",
 	description="The swagger offers the possibility to perform simple CRUD operations.",
 	docs_url="/docs",
-	version="1.0",
+	version="0.1.0",
 	lifespan=lifespan,
 )
 # Include endpoints routers

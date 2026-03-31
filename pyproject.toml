@@ -36,6 +36,7 @@ dependencies = [
     "langchain==0.3.4",
     "langchain-ollama==0.2.1",
     "langchain-google-genai>=2.1.5",
+    "langchain-google-vertexai>=2.0.10",
     "langchain-community==0.3.3",
     "langchain-qdrant==0.1.4",
     "pypdf==4.3.1",
