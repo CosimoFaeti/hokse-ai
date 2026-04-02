@@ -1,0 +1,60 @@
+from fastapi import APIRouter, Depends, Body, HTTPException
+
+from dependencies import get_agent_service, get_activity_service # TODO
+from src.domain.entities.chat_entity import ChatEntity
+from src.domain.results.result import Result
+from src.domain.utilities.logger import logger
+from src.application.interfaces.i_agent_service import IAgentService
+from src.application.interfaces.i_activity_service import IActivityService
+from src.presentation.DTOs.agent.chat.post_chat_input_dto import PostChatInputDTO # TODO
+from src.presentation.DTOs.agent.chat.post_chat_output_dto import PostChatOutputDTO  # TODO
+from src.presentation.DTOs.agent.sync.post_sync_input_dto import PostSyncInputDTO # TODO
+from src.presentation.DTOs.agent.sync.post_sync_output_dto import PostSyncOutputDTO # TODO
+from src.presentation.examples.agent.post_chat_response_examples import POST_CHAT_RESPONSE_EXAMPLES # TODO
+from src.presentation.examples.agent.post_sync_response_examples import POST_SYNC_RESPONSE_EXAMPLES # TODO
+from src.presentation.mappers.agent.post_chat_mappers import PostChatMappers # TODO
+
+agent_router = APIRouter(prefix="/agent", tags=["Agent"])
+
+# region POST
+@agent_router.post(
+    path="/chat",
+    summary="Create a new chat.",
+    description="Create a new chat.",
+    status_code=201,
+    responses=POST_CHAT_RESPONSE_EXAMPLES,
+)
+async def chat(
+        dto: PostChatInputDTO = Body(examples=POST_CHAT_RESPONSE_EXAMPLES),
+        agent_service: IAgentService = Depends(get_agent_service)
+) -> PostChatOutputDTO:
+    """"""
+    logger.info(msg="Calling POST /chat")
+
+    result: Result[ChatEntity] = await agent_service.run(message=dto.message, athlete_id=dto.athlete_id)
+
+    if result.failed:
+        raise HTTPException(detail=result.error.message, status_code=result.error.status_code)
+
+    output: PostChatOutputDTO = PostChatOutputDTO() # TODO: PostChatMappers
+
+    logger.info(msg="Successfully returning from POST /chat")
+
+    return output
+# endregion
+
+# region POST
+@agent_router.post(
+    path="/sync",
+    summary="Create a new sync.",
+    description="Create a new sync.",
+    status_code=201,
+    responses=POST_SYNC_RESPONSE_EXAMPLES,
+)
+async def sync(
+        dto: PostSyncInputDTO = Body(examples=POST_SYNC_RESPONSE_EXAMPLES),
+        activity_service: IActivityService = Depends(get_activity_service),
+)
+# endregion
+
+# TODO: Am I sure to put these two endpoints in the same directory, or better to split them into chat and activity?

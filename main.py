@@ -13,7 +13,7 @@ from src.infrastructure.clients.agent_client import AgentClient
 from src.persistence.managers.nosql_database_manager import NoSQLDatabaseManager
 from src.presentation.endpoints.health.health_endpoints import health_router
 from src.presentation.endpoints.authentication.auth_endpoints import auth_router
-from src.presentation.endpoints.chats.agent_endpoints import chats_router
+from src.presentation.endpoints.agent.agent_endpoints import chats_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
