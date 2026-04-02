@@ -1,19 +1,21 @@
+from langchain_core.language_models import BaseChatModel
+from langchain_core.tools import BaseTool
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 
 from src.domain.entities.agent_state_entity import AgentState
 from src.domain.utilities.logger import logger
-from src.infrastructure.nodes.nodes import model_node
+from src.infrastructure.nodes.nodes import make_model_node
 from src.infrastructure.utils.logic_graph import should_continue
 
-def build_graph(model, tools):
+def build_graph(model: BaseChatModel, tools: list[BaseTool]):
     """"""
     logger.info(msg="Start")
-    logger.debug() # TODO
+    logger.debug(msg=f"Building graph with {len(tools)} tools")
 
     model_with_tools = model.bind_tools(tools)
 
-    model_node = model_node(model_with_tools)
+    model_node = make_model_node(model_with_tools)
     tool_node = ToolNode(tools)
 
     # Build workflow

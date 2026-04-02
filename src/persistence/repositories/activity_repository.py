@@ -39,7 +39,7 @@ class ActivityRepository:
 
         if result is None:
             logger.error(msg=f"Entry of type activity with key={athlete_id} does not exist.")
-            return Result.fail(error=GenericErrors.not_found_error(type="activity", key=athlete_id))
+            return Result.fail(error=GenericErrors.not_found_error(type="activity", key=str(athlete_id)))
 
         logger.info(msg="End")
 

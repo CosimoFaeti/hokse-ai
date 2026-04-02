@@ -41,6 +41,8 @@ dependencies = [
     "langchain-qdrant==0.1.4",
     "pypdf==4.3.1",
     "langgraph>=0.5.4",
+    # Frontend
+    "streamlit>=1.56.0",
     # Code linting, formatting and static analysis
     "ruff==0.7.2",
     "mypy==1.13.0",

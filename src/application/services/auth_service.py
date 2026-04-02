@@ -45,7 +45,7 @@ class AuthService(IAuthService):
         logger.info(msg="Start")
         logger.debug(msg=f"Getting valid token for athlete_id={athlete_id}")
 
-        result_get_token: Result[StravaTokenEntity] = self.strava_token_repository.get(athlete_id=athlete_id)
+        result_get_token: Result[StravaTokenEntity] = await self.strava_token_repository.get(athlete_id=athlete_id)
 
         if result_get_token.failed:
             logger.error(msg="An error occurred while getting valid token.")
@@ -55,7 +55,7 @@ class AuthService(IAuthService):
 
         if token.refresh():
             logger.debug(msg="Refreshing token.")
-            result_refresh_token: Result[StravaTokenEntity] = self._refresh_token(token)
+            result_refresh_token: Result[StravaTokenEntity] = await self._refresh_token(token)
             token: StravaTokenEntity = result_refresh_token.value
 
         logger.info(msg="End")
@@ -70,7 +70,7 @@ class AuthService(IAuthService):
         logger.info(msg="Start")
         logger.debug(msg=f"Revoking token for athlete_id={athlete_id}")
 
-        result_revoke: Result[StravaTokenEntity] = self.strava_token_repository.delete(athlete_id=athlete_id)
+        result_revoke: Result[StravaTokenEntity] = await self.strava_token_repository.delete(athlete_id=athlete_id)
 
         if result_revoke.failed:
             logger.error(msg="An error occurred while revoking token.")

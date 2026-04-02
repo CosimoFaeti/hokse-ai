@@ -2,10 +2,9 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import SystemMessage
 
 from src.domain.entities.agent_state_entity import AgentState
-from src.domain.results.result import Result
 from src.domain.templates.prompt import system_prompt
 
-def model_node(model_with_tools: BaseChatModel):
+def make_model_node(model_with_tools: BaseChatModel):
     """"""
 
     async def llm_call(state: AgentState) -> dict:

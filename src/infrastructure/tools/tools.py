@@ -1,15 +1,12 @@
-import datetime
-from datetime import datetime, timezone, timedelta
-from langchain_core.tools import tools
+from datetime import datetime, timezone
+from langchain_core.tools import tool
 
 from src.domain.entities.activity_entity import ActivityEntity
-from src.domain.results.result import Result
-from src.domain.utilities.constants import PERIODS
-from src.infrastructure.utils.tools_helpers import resolve_period, prev_numeric, format_delta, overall_trend, stats, _row
+from src.infrastructure.utils.tools_helpers import resolve_period
 from src.persistence.repositories.activity_repository import ActivityRepository
 
-@tools
-async def get_activities(athlete_id: int, mode: str = "list", sport_type: str | None = "Run", limit: int = 10, period: str | None = None) -> Result[str]:
+@tool
+async def get_activities(athlete_id: int, mode: str = "list", sport_type: str | None = "Run", limit: int = 10, period: str | None = None) -> str:
     """"""
     if mode == "list":
 
@@ -18,9 +15,6 @@ async def get_activities(athlete_id: int, mode: str = "list", sport_type: str | 
             sport_type=sport_type,
             limit=limit,
         )
-
-        if result_activities.failed:
-            return Result.fail(error=result_activities.error)
 
         activities: list[ActivityEntity] = result_activities.value
 
@@ -60,9 +54,6 @@ async def get_activities(athlete_id: int, mode: str = "list", sport_type: str | 
             start=start.isoformat(),
             end=end.isoformat(),
         )
-
-        if result_activities.failed:
-            return Result.fail(error=result_activities.error)
 
         activities: list[ActivityEntity] = result_activities.value
 

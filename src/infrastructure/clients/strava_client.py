@@ -13,17 +13,84 @@ from src.persistence.repositories.strava_token_repository import StravaTokenRepo
 class StravaClient(metaclass=Singleton):
     """Utility class to manage connection with Strava API."""
 
-    def __init__(self, strava_token_repo: StravaTokenRepository):
-        self._strava_token_repo = strava_token_repo
+    def __init__(self, strava_token_repository: StravaTokenRepository):
+        self.strava_token_repository = strava_token_repository
 
     # Public
+
+    @exception_handler
+    async def exchange_code(self, code: str) -> Result[StravaTokenEntity]:
+        """"""
+        logger.info(msg="Start")
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url=SETTINGS.STRAVA_TOKEN_URL,
+                data={
+                    "client_id": SETTINGS.STRAVA_CLIENT_ID,
+                    "client_secret": SETTINGS.STRAVA_CLIENT_SECRET,
+                    "code": code,
+                    "grant_type": "authorization_code",
+                }
+            )
+            response.raise_for_status()
+            data = response.json()
+
+        token = StravaTokenEntity(
+            athlete_id=data["athlete"]["id"],
+            access_token=data["access_token"],
+            refresh_token=data["refresh_token"],
+            expires_at=data["expires_at"],
+            scope=data.get("scope", SETTINGS.STRAVA_SCOPE),
+        )
+
+        logger.end(msg="End")
+        logger.debug(msg=f"Code exchanged for athlete_id={token.athlete_id}")
+
+        return Result.ok(value=token)
+
+    @exception_handler
+    async def refresh_token(self, token: StravaTokenEntity) -> Result[StravaTokenEntity]:
+        """"""
+        logger.info(msg="Start")
+        logger.debug(msg=f"Refreshing Strava token for athlete_id={token.athlete_id}")
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url=SETTINGS.STRAVA_TOKEN_URL,
+                data={
+                    "client_id": SETTINGS.STRAVA_CLIENT_ID,
+                    "client_secret": SETTINGS.STRAVA_CLIENT_SECRET,
+                    "grant_type": "refresh_token",
+                    "refresh_token": token.refresh_token,
+                }
+            )
+            response.raise_for_status()
+            data = response.json()
+
+        new_strava_token = StravaTokenEntity(
+            athlete_id=token.athlete_id,
+            access_token=data.access_token,
+            refresh_token=data.refresh_token,
+            expires_at=data.expires_at,
+            scope=token.scope,
+        )
+
+        logger.info(msg="End")
+
+        return Result.ok(value=new_strava_token)
 
     @exception_handler
     async def get_activities(self, athlete_id: int, per_page: int = 100, page: int = 1) -> Result[list[ActivityEntity]]:
         """"""
         logger.info(msg="Start")
 
-        result_strava_token = await self._get_valid_token(athlete_id)
+        result_strava_token = await self.strava_token_repository.get(athlete_id=athlete_id)
+
+        if result_strava_token.failed:
+            logger.error(msg="An error occurred while retrieving Strava token.")
+            return Result.fail(erorr=result_strava_token.error)
+
         strava_token = result_strava_token.value
 
         async with httpx.AsyncClient() as client:
@@ -35,10 +102,10 @@ class StravaClient(metaclass=Singleton):
             response.raise_for_status()
             data = response.json()
 
-        result: list[ActivityEntity] = []
+        activities: list[ActivityEntity] = []
 
         for activity in data:
-            result.append(ActivityEntity(
+            activities.append(ActivityEntity(
                 athlete_id=athlete_id,
                 name=activity.name,
                 sport_type=activity.sport_type,
@@ -48,68 +115,14 @@ class StravaClient(metaclass=Singleton):
                 total_elevation_gain=activity.total_elevation_gain,
                 elev_high=activity.elev_high,
                 elev_low=activity.elev_low,
+                average_heartrate=activity.average_heartrate,
                 start_date=activity.start_date,
             ))
 
         logger.info(msg="End")
-        logger.debug(msg=f"Return value=list of {len(result)} activities.")
+        logger.debug(msg=f"Return value=list of {len(activities)} activities.")
 
-        return Result.ok(value=result)
-
-    # Private
-
-    @exception_handler
-    async def _get_valid_token(self, athlete_id: int | None = None) -> Result[StravaTokenEntity]:
-        """"""
-        logger.info(msg="Start")
-        logger.debug(msg=f"Getting valid Strava token with key={athlete_id}")
-
-        result_strava_token = await self._strava_token_repo.get(athlete_id)
-        strava_token = result_strava_token.value
-
-        # TODO: if strava_token is None?
-
-        if strava_token.refresh():
-            result_strava_token = self._refresh_token(strava_token)
-            strava_token = result_strava_token.value
-
-        logger.info(msg="End")
-
-        return Result.ok(value=strava_token)
-
-    @exception_handler
-    async def _refresh_token(self, strava_token: StravaTokenEntity) -> Result[StravaTokenEntity]:
-        """"""
-        logger.info(msg="Start")
-
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                url=SETTINGS.STRAVA_TOKEN_URL,
-                data={
-                    "client_id": SETTINGS.STRAVA_CLIENT_ID,
-                    "client_secret": SETTINGS.STRAVA_CLIENT_SECRET,
-                    "grant_type": "refresh_token",
-                    "refresh_token": strava_token.refresh_token,
-                }
-            )
-            response.raise_for_status()
-            data = response.json()
-
-        new_strava_token = StravaTokenEntity(
-            athlete_id=strava_token.athlete_id,
-            access_token=data.access_token,
-            refresh_token=data.refresh_token,
-            expires_at=data.expires_at,
-            scope=strava_token.scope,
-        )
-
-        await self._strava_token_repo.post(new_strava_token)
-
-        logger.info(msg="End")
-
-        return Result.ok(value=new_strava_token)
-
-
+        return Result.ok(value=activities)
 
 
 
