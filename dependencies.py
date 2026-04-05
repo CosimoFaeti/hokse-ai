@@ -15,3 +15,4 @@ def get_graph_template_service() -> GraphTemplateService:
 
 def get_vector_template_service() -> VectorTemplateService:
     raise NotImplementedError()
+

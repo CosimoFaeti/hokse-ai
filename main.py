@@ -4,7 +4,6 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from container import Container
 from dependencies import get_sql_template_service, get_nosql_template_service, get_graph_template_service, \
 	get_vector_template_service
 from src.domain.utilities.logger import logger
