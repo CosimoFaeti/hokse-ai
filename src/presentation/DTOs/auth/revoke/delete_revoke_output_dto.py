@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class GetStatusOutputDTO(BaseModel):
+class DeleteRevokeOutputDTO(BaseModel):
     athlete_id: int
     access_token: str
     refresh_token: str

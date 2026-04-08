@@ -10,14 +10,17 @@ from src.domain.results.result import Result
 from src.domain.utilities.logger import logger
 from src.domain.utilities.settings import SETTINGS
 from src.application.interfaces.i_auth_service import IAuthService
-from src.presentation.DTOs.auth.callback.get_callback_input_dto import GetCallbackInputDTO # todo
-from src.presentation.DTOs.auth.callback.get_callback_output_dto import GetCallbackOutputDTO # todo
-from src.presentation.DTOs.auth.status.get_status_input_dto import GetStatusInputDTO # todo
-from src.presentation.DTOs.auth.status.get_status_output_dto import GetStatusOutputDTO # todo
-from src.presentation.examples.auth.get_strava_response_examples import GET_STRAVA_RESPONSE_EXAMPLES # todo
-from src.presentation.examples.auth.get_callback_response_examples import GET_CALLBACK_RESPONSE_EXAMPLES # todo
-from src.presentation.examples.auth.get_status_response_examples import GET_STATUS_RESPONSE_EXAMPLES # todo
-from src.presentation.mappers.auth.get_status_mappers import GetStatusMappers # TODO
+from src.presentation.DTOs.auth.callback.get_callback_input_dto import GetCallbackInputDTO
+from src.presentation.DTOs.auth.status.get_status_input_dto import GetStatusInputDTO
+from src.presentation.DTOs.auth.status.get_status_output_dto import GetStatusOutputDTO
+from src.presentation.DTOs.auth.revoke.delete_revoke_output_dto import DeleteRevokeOutputDTO
+from src.presentation.examples.auth.get_strava_response_examples import GET_STRAVA_RESPONSE_EXAMPLES
+from src.presentation.examples.auth.get_callback_response_examples import GET_CALLBACK_RESPONSE_EXAMPLES
+from src.presentation.examples.auth.get_status_response_examples import GET_STATUS_RESPONSE_EXAMPLES
+from src.presentation.examples.auth.delete_revoke_response_examples import DELETE_REVOKE_RESPONSE_EXAMPLES
+from src.presentation.examples.auth.delete_revoke_request_examples import DELETE_REVOKE_PATH_EXAMPLE
+from src.presentation.mappers.auth.get_status_mappers import GetStatusMappers
+from src.presentation.mappers.auth.delete_revoke_mappers import DeleteRevokeMappers
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -61,8 +64,8 @@ async def strava_login() -> RedirectResponse:
     responses=GET_CALLBACK_RESPONSE_EXAMPLES,
 )
 async def strava_callback(
-        dto: GetCallbackInputDTO = Body(examples=GET_CALLBACK_RESPONSE_EXAMPLES),
         state: str,
+        dto: GetCallbackInputDTO = Body(examples=GET_CALLBACK_RESPONSE_EXAMPLES),
         auth_service: IAuthService = Depends(get_auth_service),
 ) -> RedirectResponse:
     """"""
@@ -105,7 +108,7 @@ async def auth_status(
     if result.failed:
         raise HTTPException(detail=result.error.message, status_code=result.error.status_code)
 
-    output: GetStatusOutputDTO = GetStatusOutputDTO() # TODO: GetStatusMappers
+    output: GetStatusOutputDTO = GetStatusMappers().to_dto(entity=result.value)
 
     logger.info(msg="Successfully returning from GET /auth/status")
 
@@ -120,7 +123,7 @@ async def auth_status(
     responses=DELETE_REVOKE_RESPONSE_EXAMPLES,
 )
 async def revoke(
-        athlete_id: PositiveInt = Path(example=DELETE_REVOKE_PATH_EXAMPLE),
+        athlete_id: int = Path(example=DELETE_REVOKE_PATH_EXAMPLE),
         auth_service: IAuthService = Depends(get_auth_service),
 ) -> DeleteRevokeOutputDTO:
     """"""

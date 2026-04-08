@@ -4,7 +4,7 @@ from src.domain.entities.strava_token_entity import StravaTokenEntity
 from src.domain.results.result import Result
 from src.domain.utilities.logger import logger
 from src.domain.utilities.exception_handler import exception_handler
-from src.application.clients.i_strava_client import IStravaClient # TODO
+from src.application.clients.i_strava_client import IStravaClient
 from src.application.interfaces.i_auth_service import IAuthService
 from src.application.repositories.i_strava_token_repository import IStravaTokenRepository
 

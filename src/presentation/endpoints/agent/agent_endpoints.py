@@ -7,16 +7,16 @@ from src.domain.results.result import Result
 from src.domain.utilities.logger import logger
 from src.application.interfaces.i_agent_service import IAgentService
 from src.application.interfaces.i_activity_service import IActivityService
-from src.presentation.DTOs.agent.chat.post_chat_input_dto import PostChatInputDTO # TODO
-from src.presentation.DTOs.agent.chat.post_chat_output_dto import PostChatOutputDTO  # TODO
-from src.presentation.DTOs.agent.sync.post_sync_input_dto import PostSyncInputDTO # TODO
-from src.presentation.DTOs.agent.sync.post_sync_output_dto import PostSyncOutputDTO # TODO
-from src.presentation.examples.agent.post_chat_response_examples import POST_CHAT_RESPONSE_EXAMPLES # TODO
-from src.presentation.examples.agent.post_chat_request_examples import POST_CHAT_BODY_EXAMPLES # TODO
-from src.presentation.examples.agent.post_sync_response_examples import POST_SYNC_RESPONSE_EXAMPLES # TODO
-from src.presentation.examples.agent.post_sync_request_examples import POST_SYNC_BODY_EXAMPLES # TODO
-from src.presentation.mappers.agent.post_chat_mappers import PostChatMappers # TODO
-from src.presentation.mappers.agent.post_sync_mappers import PostSyncMapper # TODO
+from src.presentation.DTOs.agent.chat.post_chat_input_dto import PostChatInputDTO
+from src.presentation.DTOs.agent.chat.post_chat_output_dto import PostChatOutputDTO
+from src.presentation.DTOs.agent.sync.post_sync_input_dto import PostSyncInputDTO
+from src.presentation.DTOs.agent.sync.post_sync_output_dto import PostSyncOutputDTO
+from src.presentation.examples.agent.post_chat_response_examples import POST_CHAT_RESPONSE_EXAMPLES
+from src.presentation.examples.agent.post_chat_request_examples import POST_CHAT_BODY_EXAMPLES
+from src.presentation.examples.agent.post_sync_response_examples import POST_SYNC_RESPONSE_EXAMPLES
+from src.presentation.examples.agent.post_sync_request_examples import POST_SYNC_BODY_EXAMPLES
+from src.presentation.mappers.agent.post_chat_mappers import PostChatMappers
+from src.presentation.mappers.agent.post_sync_mappers import PostSyncMappers
 
 agent_router = APIRouter(prefix="/agent", tags=["Agent"])
 
@@ -56,7 +56,7 @@ async def chat(
 async def sync(
         dto: PostSyncInputDTO = Body(examples=POST_SYNC_BODY_EXAMPLES),
         activity_service: IActivityService = Depends(get_activity_service),
-) -> PostSyncOutputDTO:
+) -> list[PostSyncOutputDTO]:
     """"""
     logger.info(msg="Calling POST /sync")
 
@@ -65,7 +65,7 @@ async def sync(
     if result.failed:
         raise HTTPException(detail=result.error.message, status_code=result.error.status_code)
 
-    output: PostSyncOutputDTO = PostSyncMappers.to_dto(entity=result.value)
+    output: list[PostSyncOutputDTO] = [PostSyncMappers.to_dto(entity=entity) for entity in result.value]
 
     logger.info(msg="Successfully returning from POST /sync")
 

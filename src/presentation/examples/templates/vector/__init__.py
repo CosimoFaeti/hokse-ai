@@ -1,1 +1,0 @@
-"""``templates`` related VectorDB examples"""
