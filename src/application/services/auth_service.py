@@ -1,5 +1,3 @@
-from typing import Type
-
 from src.domain.entities.strava_token_entity import StravaTokenEntity
 from src.domain.results.result import Result
 from src.domain.utilities.logger import logger
@@ -12,7 +10,7 @@ from src.application.repositories.i_strava_token_repository import IStravaTokenR
 class AuthService(IAuthService):
     """Forwards requests to Strava token repository and Strava client."""
 
-    def __init__(self, strava_token_repository: Type[IStravaTokenRepository], strava_client: Type[IStravaClient]):
+    def __init__(self, strava_token_repository: IStravaTokenRepository, strava_client: IStravaClient):
         self.strava_token_repository = strava_token_repository
         self.strava_client = strava_client
 

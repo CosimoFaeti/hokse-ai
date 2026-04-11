@@ -18,8 +18,9 @@ RUN uv sync
 # Copying project files. Since project files change less often w.r.t. dependencies, they are put after installation in
 # order to exploit layers cache.
 COPY src/ src/
-COPY main.py main.py
+COPY ui/ ui/
 
 # Start server
-CMD ["python", "main.py"]
+EXPOSE 8501
+CMD ["uv", "run", "streamlit", "run", "ui/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
 

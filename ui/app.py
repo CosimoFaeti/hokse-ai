@@ -3,6 +3,7 @@ import streamlit as st
 
 from src.domain.utilities.settings import SETTINGS
 
+
 st.set_page_config(
     page_title="Hokse-ai",
     page_icon="🏃",
@@ -17,7 +18,7 @@ st.caption("Your personal training coach, powered by AI")
 @st.cache_data(ttl=300, show_spinner=False)
 def ping_api() -> bool:
     try:
-        r = httpx.get(f"{SETTINGS.API_BASE_URL}/health", timeout=35)
+        r = httpx.get(url=f"http://{SETTINGS.HOST}:{SETTINGS.PORT}/health", timeout=35)
         return r.status_code == 200
     except Exception:
         return False
@@ -46,8 +47,8 @@ if not st.session_state.athlete_id:
         "Click to authorise the agent to read your activities."
     )
     st.link_button(
-        "Connect with Strava",
-        url=f"{SETTINGS.API_BASE_URL}/auth/strava",
+        label="Connect with Strava",
+        url=f"http://{SETTINGS.HOST}:{SETTINGS.PORT}/auth/strava",
         use_container_width=True,
     )
     st.stop()
@@ -65,7 +66,7 @@ with col1:
         with st.spinner("Syncing from Strava..."):
             try:
                 r = httpx.post(
-                    url=f"{SETTINGS.API_URL}/agent/sync",
+                    url=f"http://{SETTINGS.HOST}:{SETTINGS.PORT}/agent/sync",
                     json={"athlete_id": athlete_id, "pages": 3},
                     timeout=60,
                 )
@@ -77,7 +78,7 @@ with col1:
 with col2:
     if st.button(label="Disconnect", use_container_width=True):
         try:
-            httpx.delete(url=f"{SETTINGS.API_URL}/auth/{athlete_id}", timeout=10)
+            httpx.delete(url=f"http://{SETTINGS.HOST}:{SETTINGS.PORT}/auth/{athlete_id}", timeout=10)
         except Exception:
             pass
         st.session_state.athlete_id = None
@@ -116,7 +117,7 @@ if user_input := st.chat_input("Ask about your training..."):
         with st.spinner("Thinking..."):
             try:
                 r = httpx.post(
-                    url=f"{SETTINGS.API_URL}/agent/chat",
+                    url=f"https://{SETTINGS.HOST}:{SETTINGS:PORT}/agent/chat",
                     json={"athlete_id": athlete_id, "message": user_input},
                     timeout=60,
                 )

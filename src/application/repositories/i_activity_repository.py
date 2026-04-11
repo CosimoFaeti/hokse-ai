@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from pydantic import UUID4
 
 from src.domain.entities.activity_entity import ActivityEntity
 from src.domain.results.result import Result

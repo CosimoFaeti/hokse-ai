@@ -89,7 +89,7 @@ class StravaClient(metaclass=Singleton):
 
         if result_strava_token.failed:
             logger.error(msg="An error occurred while retrieving Strava token.")
-            return Result.fail(erorr=result_strava_token.error)
+            return Result.fail(error=result_strava_token.error)
 
         strava_token = result_strava_token.value
 

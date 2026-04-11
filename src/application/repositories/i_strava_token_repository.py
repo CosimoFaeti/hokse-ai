@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from pydantic import UUID4
 
 from src.domain.entities.strava_token_entity import StravaTokenEntity
 from src.domain.results.result import Result
@@ -23,6 +22,6 @@ class IStravaTokenRepository(ABC):
     # region DELETE
     @staticmethod
     @abstractmethod
-    async def delete(athlete_id: str) -> Result[StravaTokenEntity]:
+    async def delete(athlete_id: int) -> Result[StravaTokenEntity]:
         pass
     # endregion

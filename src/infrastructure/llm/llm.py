@@ -12,11 +12,11 @@ def model() -> BaseChatModel:
     if SETTINGS.LLM_PROVIDER == "ollama":
         return ChatOllama(
             model=SETTINGS.LLM_MODEL,
-            base_url=SETTINGS.LLM_BASE_URL,
+            temperature=0.0,
         )
     elif SETTINGS.LLM_PROVIDER == "google":
         return ChatGoogleGenerativeAI(
             model=SETTINGS.LLM_MODEL,
-            google_api_key=SETTINGS.LLM_GOOGLE_API_KEY,
+            google_api_key=SETTINGS.LLM_API_KEY,
             temperature=0.0
         )

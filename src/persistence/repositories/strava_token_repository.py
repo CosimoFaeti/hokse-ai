@@ -1,11 +1,6 @@
-import jsonpatch
-
-from pydantic import UUID4
-from beanie.exceptions import DocumentNotFound
 from datetime import timezone
 
 from src.domain.entities.strava_token_entity import StravaTokenEntity
-from src.domain.entities.patch_entity import PatchEntity
 from src.domain.errors.generic_errors import GenericErrors
 from src.domain.results.result import Result
 from src.domain.utilities.exception_handler import exception_handler
@@ -28,7 +23,7 @@ class StravaTokenRepository:
 
 		if result is None:
 			logger.error(msg=f"Entry of type strava token with key={athlete_id} does not exist.")
-			return Result.fail(error=GenericErrors.not_found_error(type="strava_token", key=athlete_id))
+			return Result.fail(error=GenericErrors.not_found_error(type="strava_token", key=str(athlete_id)))
 
 		logger.info(msg="End")
 
@@ -72,7 +67,7 @@ class StravaTokenRepository:
 
 		if result is None:
 			logger.error(msg=f"Entry of type strava token with key={athlete_id} does not exist.")
-			return Result.fail(error=GenericErrors.not_found_error(type="strava_token", key=athlete_id))
+			return Result.fail(error=GenericErrors.not_found_error(type="strava_token", key=str(athlete_id)))
 
 		await result.delete()
 

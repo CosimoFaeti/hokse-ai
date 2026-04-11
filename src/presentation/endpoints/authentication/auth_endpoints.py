@@ -2,7 +2,6 @@ import secrets
 
 from fastapi import APIRouter, Depends, Body, HTTPException, Path
 from fastapi.responses import RedirectResponse
-from pydantic import PositiveInt
 
 from dependencies import get_auth_service
 from src.domain.entities.strava_token_entity import StravaTokenEntity

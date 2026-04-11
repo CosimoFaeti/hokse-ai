@@ -1,5 +1,3 @@
-from typing import Type
-
 from src.domain.entities.activity_entity import ActivityEntity
 from src.domain.entities.strava_token_entity import StravaTokenEntity
 from src.domain.results.result import Result
@@ -14,7 +12,7 @@ from src.application.repositories.i_activity_repository import IActivityReposito
 class ActivityService(IActivityService):
     """"""
 
-    def __init__(self, activity_repository: Type[IActivityRepository], strava_client: Type[IStravaClient], auth_service: IAuthService):
+    def __init__(self, activity_repository: IActivityRepository, strava_client: IStravaClient, auth_service: IAuthService):
         self.activity_repository = activity_repository
         self.strava_client = strava_client
         self.auth_service = auth_service

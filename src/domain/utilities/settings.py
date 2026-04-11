@@ -7,7 +7,9 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
 	""" """
 
-	PORT: int = Field(title="PORT", description="Port on which the microservice is exposed.", default=8000)
+	API_HOST: str = Field(title="HOST", description="Host on which the microservice is running.", default="localhost")
+
+	API_PORT: int = Field(title="PORT", description="Port on which the microservice is exposed.", default=8000)
 
 	LOG_LEVEL: Literal["debug", "info", "warning", "error"] = Field(
 		title="LOG_LEVEL", description="Level for log display.", default="info"
@@ -51,8 +53,12 @@ class Settings(BaseSettings):
 		title="LLM_API_KEY", description="API key for LLM API.", default=None
 	)
 
-	LLM_BASE_URL: str | None = Field(
-		title="LLM_BASE_URL", description="Base URL for LLM API.", default=None
+	LLM_HOST: str | None = Field(
+		title="LLM_HOST", description="Host for LLM API.", default=None
+	)
+
+	LLM_PORT: int | None = Field(
+		title="LLM_PORT", description="Port for LLM API.", default=None
 	)
 
 	# endregion
@@ -85,6 +91,18 @@ class Settings(BaseSettings):
 
 	STRAVA_SCOPE: str | list[str] = Field(
 		title="STRAVA_SCOPE", description="Scope for accessing Strava API.", default=None
+	)
+
+	# endregion
+
+	# region UI
+
+	UI_HOST: str | None = Field(
+		title="UI_HOST", description="Host on which the UI is running.", default="localhost"
+	)
+
+	UI_PORT: int | None = Field(
+		title="UI_PORT", description="Port on which the UI is exposed.", default=8501
 	)
 
 	# endregion

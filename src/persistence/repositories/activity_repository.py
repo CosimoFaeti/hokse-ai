@@ -1,11 +1,6 @@
-import jsonpatch
-
 from datetime import datetime
-from pydantic import UUID4
-from beanie.exceptions import DocumentNotFound
 
 from src.domain.entities.activity_entity import ActivityEntity
-from src.domain.entities.patch_entity import PatchEntity
 from src.domain.errors.generic_errors import GenericErrors
 from src.domain.results.result import Result
 from src.domain.utilities.exception_handler import exception_handler

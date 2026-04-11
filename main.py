@@ -1,18 +1,15 @@
-from contextlib import asynccontextmanager
-
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
-from dependencies import get_sql_template_service, get_nosql_template_service, get_graph_template_service, \
-	get_vector_template_service
+from src.dependencies import get_agent_client
 from src.domain.utilities.logger import logger
 from src.domain.utilities.settings import SETTINGS
-from src.infrastructure.clients.agent_client import AgentClient
 from src.persistence.managers.nosql_database_manager import NoSQLDatabaseManager
 from src.presentation.endpoints.health.health_endpoints import health_router
 from src.presentation.endpoints.authentication.auth_endpoints import auth_router
-from src.presentation.endpoints.agent.agent_endpoints import chats_router
+from src.presentation.endpoints.agent.agent_endpoints import agent_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,14 +26,11 @@ async def lifespan(app: FastAPI):
 
 	# Initialize Agent
 	logger.info(msg="Initializing LangGraph agent.")
-	AgentClient()
+	get_agent_client()
 	logger.info(msg="Agent correctly initialized.")
 
 	logger.info(msg="App is now ready to manage requests.")
-
 	yield
-
-#container = Container()
 
 app = FastAPI(
 	title="Hokse-ai",
@@ -49,7 +43,7 @@ app = FastAPI(
 # Include endpoints routers
 app.include_router(router=health_router)
 app.include_router(router=auth_router)
-app.include_router(router=chats_router)
+app.include_router(router=agent_router)
 
 app.add_middleware(
 	CORSMiddleware,
