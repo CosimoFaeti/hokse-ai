@@ -8,9 +8,6 @@ services:
     buildCommand: pip install uv && uv sync
     startCommand: uv run uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
-      # Render injects PORT automatically; expose it to Settings via API_PORT
-      - key: API_PORT
-        fromVariable: PORT
       - key: API_HOST
         value: 0.0.0.0
       - key: LOG_LEVEL
