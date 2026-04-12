@@ -3,13 +3,13 @@ import secrets
 from fastapi import APIRouter, Depends, Body, HTTPException, Path
 from fastapi.responses import RedirectResponse
 
-from dependencies import get_auth_service
+from src.dependencies import get_auth_service, get_strava_token_repository
+from src.persistence.repositories.strava_token_repository import StravaTokenRepository
 from src.domain.entities.strava_token_entity import StravaTokenEntity
 from src.domain.results.result import Result
 from src.domain.utilities.logger import logger
 from src.domain.utilities.settings import SETTINGS
 from src.application.interfaces.i_auth_service import IAuthService
-from src.presentation.DTOs.auth.callback.get_callback_input_dto import GetCallbackInputDTO
 from src.presentation.DTOs.auth.status.get_status_input_dto import GetStatusInputDTO
 from src.presentation.DTOs.auth.status.get_status_output_dto import GetStatusOutputDTO
 from src.presentation.DTOs.auth.revoke.delete_revoke_output_dto import DeleteRevokeOutputDTO
@@ -27,6 +27,28 @@ _state_store: set[str] = set()
 
 # region GET
 @auth_router.get(
+    path="/athletes",
+    summary="List connected athletes.",
+    description="Return athlete IDs that have a stored Strava token.",
+    status_code=200,
+)
+async def list_athletes(
+        repo: StravaTokenRepository = Depends(get_strava_token_repository),
+) -> list[int]:
+    """"""
+    logger.info(msg="Calling GET /auth/athletes")
+
+    result: Result[list[int]] = await repo.get_all()
+
+    if result.failed:
+        raise HTTPException(detail=result.error.message, status_code=result.error.status_code)
+
+    logger.info(msg="Successfully returning from GET /auth/athletes")
+
+    return result.value
+
+
+@auth_router.get(
     path="/strava",
     summary="Initiate Strava Oauth flow.",
     description="Redirect to Strava consent screen",
@@ -41,8 +63,9 @@ async def strava_login() -> RedirectResponse:
     _state_store.add(state)
     logger.debug(msg=f"OAuth login initiated — state={state}")
 
-    params = (
-        f"client_id={SETTINGS.STRAVA_CLIENT_ID}",
+    url = (
+        f"{SETTINGS.STRAVA_OAUTH_URL}"
+        f"?client_id={SETTINGS.STRAVA_CLIENT_ID}"
         f"&redirect_uri={SETTINGS.STRAVA_REDIRECT_URI}"
         f"&response_type=code"
         f"&scope={SETTINGS.STRAVA_SCOPE}"
@@ -51,9 +74,7 @@ async def strava_login() -> RedirectResponse:
 
     logger.info(msg="Successfully returning from GET /auth/strava")
 
-    return RedirectResponse(
-        url=f"{SETTINGS.STRAVA_OAUTH_URL}?{params}",
-    )
+    return RedirectResponse(url=url)
 
 @auth_router.get(
     path="/callback",
@@ -64,7 +85,7 @@ async def strava_login() -> RedirectResponse:
 )
 async def strava_callback(
         state: str,
-        dto: GetCallbackInputDTO = Body(examples=GET_CALLBACK_RESPONSE_EXAMPLES),
+        code: str,
         auth_service: IAuthService = Depends(get_auth_service),
 ) -> RedirectResponse:
     """"""
@@ -75,14 +96,14 @@ async def strava_callback(
         raise HTTPException(status_code=400, detail="Invalid OAuth state parameter.")
     _state_store.discard(state)
 
-    result: Result[StravaTokenEntity] = await auth_service.exchange_code(code=dto.code)
+    result: Result[StravaTokenEntity] = await auth_service.exchange_code(code=code)
 
     if result.failed:
         raise HTTPException(detail=result.error.message, status_code=result.error.status_code)
 
     token: StravaTokenEntity = result.value
 
-    streamlit_url = SETTINGS.api_base_url.replace("8000", "8501")
+    streamlit_url = f"http://{SETTINGS.UI_HOST}:{SETTINGS.UI_PORT}"
 
     logger.info(msg="Successfully returning from GET /auth/callback")
 

@@ -12,8 +12,8 @@ class ActivityRepository:
     """Repository to perform operations on activity NoSQL collection."""
 
     # region GET
-    @exception_handler
     @staticmethod
+    @exception_handler
     async def get(athlete_id: int | None, sport_type: str | None = None, limit: int = 10, start: str | None = None, end: str | None = None) -> Result[list[ActivityEntity]]:
         """"""
 
@@ -47,8 +47,8 @@ class ActivityRepository:
     # endregion
 
     # region POST
-    @exception_handler
     @staticmethod
+    @exception_handler
     async def post(activities: list[ActivityEntity]) -> Result[list[ActivityEntity]]:
         """"""
 

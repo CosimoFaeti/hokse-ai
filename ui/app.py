@@ -1,8 +1,16 @@
+import os
+
 import httpx
 import streamlit as st
 
-from src.domain.utilities.settings import SETTINGS
+API_BASE = (
+    os.environ.get("API_BASE_URL")
+    or f"http://{os.environ.get('API_HOST', 'localhost')}:{os.environ.get('API_PORT', '8080')}"
+)
 
+# Used for browser-facing links (OAuth button). Must be reachable from the user's browser,
+# not from inside Docker — so it uses the host-accessible URL, not the internal Docker hostname.
+API_PUBLIC_URL = os.environ.get("API_PUBLIC_URL") or API_BASE
 
 st.set_page_config(
     page_title="Hokse-ai",
@@ -18,8 +26,8 @@ st.caption("Your personal training coach, powered by AI")
 @st.cache_data(ttl=300, show_spinner=False)
 def ping_api() -> bool:
     try:
-        r = httpx.get(url=f"http://{SETTINGS.HOST}:{SETTINGS.PORT}/health", timeout=35)
-        return r.status_code == 200
+        r = httpx.post(url=f"{API_BASE}/healthz", timeout=35)
+        return r.status_code == 204
     except Exception:
         return False
 
@@ -32,8 +40,18 @@ with st.spinner("Connecting to server..."):
 
 # region SESSION STATE
 if "athlete_id" not in st.session_state:
+    # 1. Prefer athlete_id coming from the OAuth callback query param
     params = st.query_params
-    st.session_state.athlete_id = int(params["athlete_id"] if "athlete_id" in params else None)
+    if "athlete_id" in params:
+        st.session_state.athlete_id = int(params["athlete_id"])
+    else:
+        # 2. Fall back to any athlete already stored in the database
+        try:
+            r = httpx.get(url=f"{API_BASE}/auth/athletes", timeout=10)
+            ids: list[int] = r.json() if r.status_code == 200 else []
+            st.session_state.athlete_id = ids[0] if ids else None
+        except Exception:
+            st.session_state.athlete_id = None
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -43,12 +61,10 @@ if "messages" not in st.session_state:
 # region AUTH GATE
 if not st.session_state.athlete_id:
     st.markdown("### Connect your Strava account")
-    st.markdown(
-        "Click to authorise the agent to read your activities."
-    )
+    st.markdown("No account found in the database. Authorise once to get started.")
     st.link_button(
         label="Connect with Strava",
-        url=f"http://{SETTINGS.HOST}:{SETTINGS.PORT}/auth/strava",
+        url=f"{API_PUBLIC_URL}/auth/strava",
         use_container_width=True,
     )
     st.stop()
@@ -59,32 +75,19 @@ if not st.session_state.athlete_id:
 athlete_id = st.session_state.athlete_id
 st.success(f"Connected - Athlete ID: {athlete_id}")
 
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button(label="Sync latest activities", use_container_width=True):
-        with st.spinner("Syncing from Strava..."):
-            try:
-                r = httpx.post(
-                    url=f"http://{SETTINGS.HOST}:{SETTINGS.PORT}/agent/sync",
-                    json={"athlete_id": athlete_id, "pages": 3},
-                    timeout=60,
-                )
-                data = r.json()
-                st.success(data.get("message", "Sync complete"))
-            except Exception as e:
-                st.error(f"Sync failed: {e}")
-
-with col2:
-    if st.button(label="Disconnect", use_container_width=True):
+if st.button(label="Sync latest activities", use_container_width=True):
+    with st.spinner("Syncing from Strava..."):
         try:
-            httpx.delete(url=f"http://{SETTINGS.HOST}:{SETTINGS.PORT}/auth/{athlete_id}", timeout=10)
-        except Exception:
-            pass
-        st.session_state.athlete_id = None
-        st.session_state.messages   = []
-        st.query_params.clear()
-        st.rerun()
+            r = httpx.post(
+                url=f"{API_BASE}/agent/sync",
+                json={"athlete_id": athlete_id, "pages": 3},
+                timeout=60,
+            )
+            data = r.json()
+            count = len(data) if isinstance(data, list) else 0
+            st.success(f"Synced {count} activities.")
+        except Exception as e:
+            st.error(f"Sync failed: {e}")
 st.divider()
 # endregion
 
@@ -117,7 +120,7 @@ if user_input := st.chat_input("Ask about your training..."):
         with st.spinner("Thinking..."):
             try:
                 r = httpx.post(
-                    url=f"https://{SETTINGS.HOST}:{SETTINGS:PORT}/agent/chat",
+                    url=f"{API_BASE}/agent/chat",
                     json={"athlete_id": athlete_id, "message": user_input},
                     timeout=60,
                 )

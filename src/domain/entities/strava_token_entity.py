@@ -18,8 +18,8 @@ class StravaTokenEntity(BaseModel):
         title="refresh_token", description="Refresh token for Strava API."
     )
 
-    expires_at: int | None = Field(
-        title="expires_at", description="Expiration time for Strava API."
+    expires_at: datetime | None = Field(
+        title="expires_at", description="Expiration time for Strava API (stored as UTC datetime)."
     )
 
     scope: str | List[str] = Field(
@@ -28,14 +28,18 @@ class StravaTokenEntity(BaseModel):
 
     @field_validator('expires_at', mode='before')
     @classmethod
-    def parse_timestamp(cls, v: int | datetime) -> datetime:
+    def parse_timestamp(cls, v: int | datetime | None) -> datetime | None:
+        if v is None:
+            return None
         if isinstance(v, int):
             return datetime.fromtimestamp(v, tz=timezone.utc)
+        if isinstance(v, datetime) and v.tzinfo is None:
+            return v.replace(tzinfo=timezone.utc)
         return v
 
     def is_expired(self) -> bool:
         return datetime.now(tz=timezone.utc) >= self.expires_at
 
-    def refresh(self, buffer_seconds: int) -> bool:
+    def refresh(self, buffer_seconds: int = 300) -> bool:
         threshold = datetime.now(tz=timezone.utc) + timedelta(seconds=buffer_seconds)
         return threshold >= self.expires_at

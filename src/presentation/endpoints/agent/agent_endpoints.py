@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Body, HTTPException
 
-from dependencies import get_agent_service, get_activity_service
+from src.dependencies import get_agent_service, get_activity_service
 from src.domain.entities.chat_entity import ChatEntity
 from src.domain.entities.activity_entity import ActivityEntity
 from src.domain.results.result import Result

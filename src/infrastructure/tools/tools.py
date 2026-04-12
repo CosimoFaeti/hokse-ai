@@ -7,7 +7,12 @@ from src.persistence.repositories.activity_repository import ActivityRepository
 
 @tool
 async def get_activities(athlete_id: int, mode: str = "list", sport_type: str | None = "Run", limit: int = 10, period: str | None = None) -> str:
-    """"""
+    """Fetch training activities for an athlete from the database.
+
+    Use mode='list' to get individual activity rows, or mode='aggregate' to get
+    totals (distance, time, elevation, avg HR) for a time period.
+    period accepts values like 'this_week', 'last_week', 'this_month', 'last_month'.
+    """
     if mode == "list":
 
         result_activities = await ActivityRepository().get(

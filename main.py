@@ -54,6 +54,6 @@ app.add_middleware(
 )
 
 
-logger.info(msg=f"Starting server on 0.0.0.0:{SETTINGS.PORT}")
-
-uvicorn.run(app=app, host="0.0.0.0", port=SETTINGS.PORT, log_level="error")
+if __name__ == "__main__":
+    logger.info(msg=f"Starting server on 0.0.0.0:{SETTINGS.API_PORT}")
+    uvicorn.run(app=app, host="0.0.0.0", port=SETTINGS.API_PORT, log_level="error")

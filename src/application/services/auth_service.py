@@ -20,7 +20,7 @@ class AuthService(IAuthService):
         """"""
         logger.info(msg="Start")
 
-        result_exchange_code: Result[StravaTokenEntity] = self.strava_client.exchange_code(code=code)
+        result_exchange_code: Result[StravaTokenEntity] = await self.strava_client.exchange_code(code=code)
 
         if result_exchange_code.failed:
             logger.error(msg="An error occurred while exchange code.")
@@ -87,7 +87,7 @@ class AuthService(IAuthService):
         """"""
         logger.debug(msg=f"Refreshing token for athlete_id={token.athlete_id}")
 
-        result_refresh_token: Result[StravaTokenEntity] = self.strava_client.refresh_token(token=token)
+        result_refresh_token: Result[StravaTokenEntity] = await self.strava_client.refresh_token(token=token)
 
         if result_refresh_token.failed:
             logger.error(msg="An error occurred while refreshing token.")

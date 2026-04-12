@@ -1,5 +1,3 @@
-from datetime import timezone
-
 from src.domain.entities.strava_token_entity import StravaTokenEntity
 from src.domain.errors.generic_errors import GenericErrors
 from src.domain.results.result import Result
@@ -12,8 +10,22 @@ class StravaTokenRepository:
 	"""Repository to perform operations on strava token NoSQL collection."""
 
 	# region GET
-	@exception_handler
 	@staticmethod
+	@exception_handler
+	async def get_all() -> Result[list[int]]:
+		""""""
+
+		logger.info(msg="Start")
+
+		results = await StravaToken.find_all().to_list()
+		athlete_ids: list[int] = [r.athlete_id for r in results]
+
+		logger.info(msg="End")
+
+		return Result.ok(value=athlete_ids)
+
+	@staticmethod
+	@exception_handler
 	async def get(athlete_id: int | None) -> Result[StravaTokenEntity]:
 		""""""
 
@@ -31,7 +43,7 @@ class StravaTokenRepository:
 			athlete_id=result.athlete_id,
 			access_token=result.access_token,
 			refresh_token=result.refresh_token,
-			expires_at=result.expires_at.replace(tzinfo=timezone.utc),
+			expires_at=result.expires_at,
 			scope=result.scope,
 		)
 
@@ -39,8 +51,8 @@ class StravaTokenRepository:
 	# endregion
 
 	# region POST
-	@exception_handler
 	@staticmethod
+	@exception_handler
 	async def post(token: StravaTokenEntity) -> Result[StravaTokenEntity]:
 		""""""
 
@@ -56,8 +68,8 @@ class StravaTokenRepository:
 	# endregion
 
 	# region DELETE
-	@exception_handler
 	@staticmethod
+	@exception_handler
 	async def delete(athlete_id: int | None) -> Result[StravaTokenEntity]:
 		""""""
 

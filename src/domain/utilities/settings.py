@@ -11,6 +11,10 @@ class Settings(BaseSettings):
 
 	API_PORT: int = Field(title="PORT", description="Port on which the microservice is exposed.", default=8000)
 
+	API_BASE_URL: str | None = Field(
+		title="API_BASE_URL", description="Full base URL for the API (overrides API_HOST+API_PORT, used for deployments like Render).", default=None
+	)
+
 	LOG_LEVEL: Literal["debug", "info", "warning", "error"] = Field(
 		title="LOG_LEVEL", description="Level for log display.", default="info"
 	)

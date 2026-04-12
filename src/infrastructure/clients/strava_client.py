@@ -44,7 +44,7 @@ class StravaClient(metaclass=Singleton):
             scope=data.get("scope", SETTINGS.STRAVA_SCOPE),
         )
 
-        logger.end(msg="End")
+        logger.info(msg="End")
         logger.debug(msg=f"Code exchanged for athlete_id={token.athlete_id}")
 
         return Result.ok(value=token)
@@ -70,9 +70,9 @@ class StravaClient(metaclass=Singleton):
 
         new_strava_token = StravaTokenEntity(
             athlete_id=token.athlete_id,
-            access_token=data.access_token,
-            refresh_token=data.refresh_token,
-            expires_at=data.expires_at,
+            access_token=data["access_token"],
+            refresh_token=data["refresh_token"],
+            expires_at=data["expires_at"],
             scope=token.scope,
         )
 
@@ -107,16 +107,16 @@ class StravaClient(metaclass=Singleton):
         for activity in data:
             activities.append(ActivityEntity(
                 athlete_id=athlete_id,
-                name=activity.name,
-                sport_type=activity.sport_type,
-                distance=activity.distance,
-                moving_time=activity.moving_time,
-                elapsed_time=activity.elapsed_time,
-                total_elevation_gain=activity.total_elevation_gain,
-                elev_high=activity.elev_high,
-                elev_low=activity.elev_low,
-                average_heartrate=activity.average_heartrate,
-                start_date=activity.start_date,
+                name=activity["name"],
+                sport_type=activity["sport_type"],
+                distance=activity["distance"],
+                moving_time=activity["moving_time"],
+                elapsed_time=activity["elapsed_time"],
+                total_elevation_gain=activity["total_elevation_gain"],
+                elev_high=activity.get("elev_high"),
+                elev_low=activity.get("elev_low"),
+                average_heartrate=activity.get("average_heartrate"),
+                start_date=activity["start_date"],
             ))
 
         logger.info(msg="End")
