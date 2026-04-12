@@ -124,7 +124,7 @@ if user_input := st.chat_input("Ask about your training..."):
                     json={"athlete_id": athlete_id, "message": user_input},
                     timeout=60,
                 )
-                reply = r.json().get("reply", "No response.")
+                reply = r.json().get("message", "No response.")
             except Exception as e:
                 reply = f"Error contacting the backend: {e}"
         st.markdown(reply)

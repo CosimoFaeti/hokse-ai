@@ -1,12 +1,14 @@
 from datetime import datetime, timezone
+from typing import Annotated
 from langchain_core.tools import tool
+from langgraph.prebuilt import InjectedState
 
 from src.domain.entities.activity_entity import ActivityEntity
 from src.infrastructure.utils.tools_helpers import resolve_period
 from src.persistence.repositories.activity_repository import ActivityRepository
 
 @tool
-async def get_activities(athlete_id: int, mode: str = "list", sport_type: str | None = "Run", limit: int = 10, period: str | None = None) -> str:
+async def get_activities(mode: str = "list", sport_type: str | None = "Run", limit: int = 10, period: str | None = None, *, athlete_id: Annotated[int, InjectedState("athlete_id")]) -> str:
     """Fetch training activities for an athlete from the database.
 
     Use mode='list' to get individual activity rows, or mode='aggregate' to get

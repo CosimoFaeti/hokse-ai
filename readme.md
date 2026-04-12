@@ -1,116 +1,315 @@
+# Hokse-AI
 
-# Python API Template
+**Hokse-AI** is an AI-powered personal training coach that connects to your Strava account, pulls your activity history, and lets you have a natural-language conversation about your training — powered by a LangGraph agent backed by a local Ollama model or Google Gemini.
 
-#### Python version
-[![python](https://img.shields.io/badge/Python-3.12-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
-
-#### Package and project manager
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json&style=flat&logoColor=white&label=uv&color=yellow)](https://github.com/astral-sh/uv)
-
-#### Server and API
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115.4-009688.svg?style=flat&logo=FastAPI&logoColor=white)](https://fastapi.tiangolo.com)
-[![Uvicorn](https://img.shields.io/badge/Uvicorn-0.32.0-green?style=flat&logo=uvicorn&logoColor=white)](https://www.uvicorn.org/)
-
-#### Databases and connectors
-[![Postgres](https://img.shields.io/badge/Postgres-17-%23316192.svg?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![QDrant](https://img.shields.io/badge/Qdrant-1.12.5-red.svg?style=flat&logoColor=white)](https://www.postgresql.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg?style=flat&logo=FastAPI&logoColor=white)](https://fastapi.tiangolo.com)
 [![MongoDB](https://img.shields.io/badge/MongoDB-6-%234ea94b.svg?logo=mongodb&style=flat&logoColor=white)](https://www.mongodb.com)
-[![Redis](https://img.shields.io/badge/Redis-6.2-DC382D?logo=Redis&logoColor=white)](https://redis.io/)
-[![SQLModel](https://img.shields.io/badge/SQLModel-0.0.22-violet?style=flat&logoColor=white)](https://sqlmodel.tiangolo.com/)
-[![Beanie](https://img.shields.io/badge/Beanie-1.27.0-red?style=flat&logoColor=white)](https://beanie-odm.dev/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-latest-orange?style=flat)](https://www.langchain.com/langgraph)
+[![Streamlit](https://img.shields.io/badge/Streamlit-latest-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://streamlit.io)
 
-#### Data Modelling
-[![Pydantic v2](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/pydantic/pydantic/main/docs/badge/v2.json&logoColor=white&labelColor=grey)](https://pydantic.dev)
+---
 
-#### AI Frameworks
-[![Langchain](https://img.shields.io/badge/Langchain-0.3.4-red?style=flat&logoColor=white)](https://www.langchain.com/)
+## How it works
 
-#### Linter
-[![Ruff](https://img.shields.io/badge/ruff-0.7.2-41B5BE?style=flat&logoColor=white)](https://docs.astral.sh/ruff/)
+1. You authorise Hokse-AI to read your Strava data via OAuth 2.0.
+2. You click **Sync** — the app fetches your recent activities and stores them in MongoDB.
+3. You chat with the AI coach. The LangGraph agent queries your local activity database and answers with real numbers from your training history.
 
-#### Static code analysis
-[![MyPy](https://img.shields.io/badge/mypy-1.13.0-blue?style=flat)](https://mypy-lang.org/)
+The backend is a **FastAPI** async API. The frontend is a **Streamlit** chat UI. The AI brain is a **LangGraph** agent with a `get_activities` tool that reads from MongoDB. All communication between the UI and the API is plain HTTP.
 
-#### Docs
-[![Sphinx](https://img.shields.io/badge/Sphinx-8.1.3-F7C942?style=flat&logo=sphinx&logoColor=white)](https://www.sphinx-doc.org/en/master/)
+---
 
-## Project description
+## Architecture
 
-This project is intended to be as a template for an API microservice, with connectors to multiple databases.
-Users have the possibility to perform simple CRUD operations on different databases.
+The codebase follows **Clean Architecture** — dependencies only flow inward:
 
-The code adopts and implement the following patterns or protocols:
-
-- the code is organized following Clean Architecture principles
-- the code implements and use [Result Pattern](https://www.milanjovanovic.tech/blog/functional-error-handling-in-dotnet-with-the-result-pattern) approach
-- [Json Patch](https://datatracker.ietf.org/doc/html/rfc6902) standard is adopted for managing PATCH requests
-
-
-## Install dependencies 
-
-In order to run the project, you need to install _UV_ first.
-
-On Linux and MacOS environments, launch the following command:
-
-```shell
-curl -LsSf https://astral.sh/uv/0.5.6/install.sh | sh
+```
+presentation  →  application  →  infrastructure
+                                 persistence
+                                 domain
 ```
 
-On Windows environments, launch the following command.
+| Layer | Responsibility |
+|-------|---------------|
+| `domain` | Entities, interfaces, Result pattern, utilities. No framework imports. |
+| `application` | Use-case services (`AuthService`, `AgentService`, `ActivityService`). |
+| `infrastructure` | Strava HTTP client, LLM factory, LangGraph agent and tools. |
+| `persistence` | Beanie ODM models and repositories (MongoDB). |
+| `presentation` | FastAPI routers, Pydantic DTOs, request/response mapping. |
 
+Error handling uses the **Result pattern** — every service and repository returns `Result[T]` instead of raising exceptions, making failure an explicit part of the return type.
+
+---
+
+## Prerequisites
+
+| Tool | Purpose |
+|------|---------|
+| [Python 3.12](https://www.python.org/downloads/) | Runtime |
+| [uv](https://github.com/astral-sh/uv) | Package manager |
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Local containerised run |
+| [Ollama](https://ollama.com/) | Local LLM inference (free, no API key needed) |
+| [Strava developer app](#strava-developer-app-setup) | OAuth credentials |
+
+### Install uv
+
+**Linux / macOS:**
 ```shell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/0.5.6/install.ps1 | iex"
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-After _UV_ has been installed, you are ready to install project dependencies:
-
+**Windows:**
 ```shell
-uv sync 
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-## Launching the application
-
-In order to launch the entire application (server, databases, models), you need to install Docker.
-After Docker has been installed and launched, run the following command from project root:
+### Install project dependencies
 
 ```shell
-docker compose up
+uv sync
 ```
 
-If you want to start the server locally, launch the following command:
+---
+
+## Strava Developer App Setup
+
+You need a Strava API application before you can authorise the agent. This is a one-time step.
+
+1. Go to [strava.com/settings/api](https://www.strava.com/settings/api) and log in.
+2. Fill in the creation form:
+   - **Application Name** — e.g. `hokse-ai`
+   - **Category** — `Training`
+   - **Website** — `http://localhost:8080`
+   - **Authorization Callback Domain** — `localhost`
+3. Save and note down your **Client ID** and **Client Secret**.
+
+> When deploying to the cloud, update the callback domain to match your deployed API hostname.
+
+---
+
+## Environment configuration
+
+Copy `.env.example` to `.env` and fill in your values, or edit the `.env` file directly.
+
+```dotenv
+# ── API server ────────────────────────────────────────────────
+API_HOST=localhost
+API_PORT=8080
+LOG_LEVEL=debug
+
+# ── MongoDB ───────────────────────────────────────────────────
+NOSQL_DB_HOST=mongodb        # use "mongodb" for Docker Compose, Atlas hostname for cloud
+NOSQL_DB_PORT=27017
+NOSQL_DB_USER=<your-user>
+NOSQL_DB_PASSWORD=<your-password>
+NOSQL_DB_NAME=hokse-ai-db
+
+# ── LLM — pick one provider ───────────────────────────────────
+# Option A: Ollama (local, free)
+LLM_PROVIDER=ollama
+LLM_MODEL=llama3.2
+LLM_HOST=host.docker.internal   # reaches host Ollama from inside Docker
+LLM_PORT=11434
+
+# Option B: Google Gemini (requires paid API key)
+# LLM_PROVIDER=google
+# LLM_MODEL=gemini-2.0-flash-lite
+# LLM_API_KEY=<your-key>
+
+# ── Strava OAuth ──────────────────────────────────────────────
+STRAVA_CLIENT_ID=<your-client-id>
+STRAVA_CLIENT_SECRET=<your-client-secret>
+STRAVA_OAUTH_URL=https://www.strava.com/oauth/authorize
+STRAVA_TOKEN_URL=https://www.strava.com/oauth/token
+STRAVA_API_URL=https://www.strava.com/api/v3
+STRAVA_REDIRECT_URI=http://localhost:8080/auth/callback
+STRAVA_SCOPE=activity:read_all
+
+# ── Streamlit UI ──────────────────────────────────────────────
+UI_HOST=localhost
+UI_PORT=8501
+```
+
+---
+
+## Running locally with Docker Compose
+
+This is the recommended way to run the full stack. Docker Compose starts the API, the Streamlit UI, and a MongoDB container together.
+
+### 1. Start Ollama on your host machine
 
 ```shell
-python main.py
+ollama serve
+ollama pull llama3.2
 ```
+
+> `llama3.2` (2 GB) has solid tool-calling support, which the LangGraph agent requires.  
+> `llama3.1:8b` (5 GB) gives better answer quality if your machine can handle it.
+
+### 2. Build and start all services
+
+```shell
+docker compose up --build
+```
+
+On the first run Docker will download the MongoDB image and build the two application images. Subsequent starts are faster.
+
+### 3. Open the app
+
+| Service | URL |
+|---------|-----|
+| Streamlit UI | http://localhost:8501 |
+| FastAPI docs | http://localhost:8080/docs |
+
+### 4. Authorise with Strava
+
+Click **Connect with Strava** in the UI and authorise the app. After the OAuth redirect completes your token is stored in MongoDB and the chat interface appears.
+
+### 5. Sync and chat
+
+Click **Sync latest activities**, then ask the coach anything about your training.
+
+### Stop
+
+```shell
+docker compose down          # stop containers, keep data
+docker compose down -v       # stop containers and delete MongoDB data
+```
+
+---
+
+## Running locally without Docker
+
+Use this approach for faster iteration during development. You need MongoDB running separately (Docker, local install, or MongoDB Atlas).
+
+### 1. Export environment variables
+
+**Linux / macOS:**
+```shell
+export $(grep -v '^#' .env | xargs)
+```
+
+**Windows (PowerShell):**
+```powershell
+Get-Content .env | Where-Object { $_ -notmatch '^#' -and $_ -match '=' } | ForEach-Object {
+    $k, $v = $_ -split '=', 2
+    [System.Environment]::SetEnvironmentVariable($k.Trim(), $v.Trim())
+}
+```
+
+### 2. Start Ollama
+
+```shell
+ollama serve
+```
+
+### 3. Start the API
+
+```shell
+uv run python main.py
+```
+
+### 4. Start the UI (separate terminal)
+
+```shell
+uv run streamlit run ui/app.py
+```
+
+---
+
+## Deploying to Render (cloud)
+
+The project includes a `render.yaml` Blueprint that creates both services automatically.
+
+### Step 1 — MongoDB Atlas
+
+1. Create a free cluster at [cloud.mongodb.com](https://cloud.mongodb.com/).
+2. Create a database user (Security → Database Access).
+3. Allow all IPs: Security → Network Access → `0.0.0.0/0` (Render uses dynamic IPs).
+4. Copy your cluster hostname (looks like `<cluster>.mongodb.net`).
+
+### Step 2 — Update Strava callback domain
+
+Go to [strava.com/settings/api](https://www.strava.com/settings/api) and change:
+- **Authorization Callback Domain** → `hokse-ai-api.onrender.com`
+
+### Step 3 — Deploy the Blueprint
+
+1. Push your code to GitHub.
+2. In Render: **New → Blueprint** → connect your repository.
+3. Render detects `render.yaml` and creates both `hokse-ai-api` and `hokse-ai-ui`.
+
+### Step 4 — Add secrets
+
+The Blueprint sets all static variables automatically. Secrets must be added manually.
+
+**`hokse-ai-api`** → Environment → "Add from .env file" → paste the contents of `.env.render`:
+
+```dotenv
+API_HOST=0.0.0.0
+LOG_LEVEL=info
+NOSQL_DB_HOST=<your-atlas-hostname>
+NOSQL_DB_PORT=27017
+NOSQL_DB_USER=<your-atlas-user>
+NOSQL_DB_PASSWORD=<your-atlas-password>
+NOSQL_DB_NAME=hokse-ai-db
+LLM_PROVIDER=google
+LLM_MODEL=gemini-2.0-flash-lite
+LLM_API_KEY=<your-gemini-key>
+STRAVA_CLIENT_ID=<your-client-id>
+STRAVA_CLIENT_SECRET=<your-client-secret>
+STRAVA_REDIRECT_URI=https://hokse-ai-api.onrender.com/auth/callback
+UI_HOST=hokse-ai-ui.onrender.com
+UI_PORT=443
+```
+
+**`hokse-ai-ui`** → Environment → add manually:
+
+```dotenv
+API_BASE_URL=https://hokse-ai-api.onrender.com
+API_PUBLIC_URL=https://hokse-ai-api.onrender.com
+```
+
+### Step 5 — Deploy
+
+Trigger a manual deploy on both services. Once the API shows **Live**, open `https://hokse-ai-ui.onrender.com`.
+
+> **Free tier note:** Render free services spin down after 15 minutes of inactivity. The first request after a spin-down can take up to 60 seconds.
+
+---
+
+## LLM provider reference
+
+| Provider | Cost | Setup | Best for |
+|----------|------|-------|----------|
+| Ollama (`llama3.2`) | Free | Install Ollama, `ollama pull llama3.2` | Local development |
+| Ollama (`llama3.1:8b`) | Free | Install Ollama, `ollama pull llama3.1:8b` | Local, better quality |
+| Google Gemini (`gemini-2.0-flash-lite`) | Paid | Google AI Studio API key | Cloud deployment |
+
+Switch provider by changing `LLM_PROVIDER` and `LLM_MODEL` in `.env`.
+
+---
+
+## API reference
+
+Interactive docs are available at `http://localhost:8080/docs` once the API is running.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/healthz` | Health check — returns 204 |
+| `GET` | `/auth/strava` | Redirect to Strava OAuth |
+| `GET` | `/auth/callback` | OAuth callback, exchanges code for token |
+| `GET` | `/auth/athletes` | List athlete IDs stored in the database |
+| `POST` | `/agent/sync` | Fetch and store latest activities from Strava |
+| `POST` | `/agent/chat` | Send a message to the AI coach |
+
+---
 
 ## Code quality
 
-To perform code linting (e.g. remove unused dependencies and similar) launch the following command:
 ```shell
-ruff check --fix
+ruff check --fix   # lint and auto-fix
+ruff format        # format code
 ```
-
-To format the code, launch the following command:
-
-```shell
-ruff format 
-```
-
-## Docs
-
-To create documentation for this microservice, run the following command:
-
-```shell
-docs/make html
-```
-
-To remove outdated documentation files, run the command:
-
-```shell
-docs/make clean
-```
-
-## TODOs
-
-- using Keycloak for requests authorization
-- using Redis as a cache for incoming requests
