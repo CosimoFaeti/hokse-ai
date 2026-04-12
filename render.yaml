@@ -18,15 +18,15 @@ services:
 
       # MongoDB Atlas
       - key: NOSQL_DB_HOST
-        sync: ""
+        sync: false
       - key: NOSQL_DB_PORT
         value: "27017"
       - key: NOSQL_DB_USER
-        sync: ""
+        sync: false
       - key: NOSQL_DB_PASSWORD
-        sync: ""
+        sync: false
       - key: NOSQL_DB_NAME
-        sync: ""
+        sync: false
 
       # LLM — use google (Gemini) on Render; Ollama is local-only
       - key: LLM_PROVIDER
@@ -34,27 +34,27 @@ services:
       - key: LLM_MODEL
         value: gemini-1.5-flash
       - key: LLM_API_KEY
-        sync: ""
+        sync: false
 
       # Strava OAuth
       - key: STRAVA_CLIENT_ID
-        sync: ""
+        sync: false
       - key: STRAVA_CLIENT_SECRET
-        sync: ""
+        sync: false
       - key: STRAVA_OAUTH_URL
         value: https://www.strava.com/oauth/authorize
       - key: STRAVA_TOKEN_URL
         value: https://www.strava.com/oauth/token
-      - key: STRAVA_API_URL
+      - key: STRAVA_API_URL 
         value: https://www.strava.com/api/v3
       - key: STRAVA_REDIRECT_URI
-        sync: https://hokse-ai-api.onrender.com/auth/callback
+        sync: false
       - key: STRAVA_SCOPE
         value: activity:read_all
 
       # UI redirect after OAuth — point to the UI service URL
       - key: UI_HOST
-        sync: hokse-ai-ui.onrender.com
+        sync: false
       - key: UI_PORT
         value: "443"
 
@@ -69,4 +69,4 @@ services:
     envVars:
       # Point the UI at the deployed API
       - key: API_BASE_URL
-        sync: https://hokse-ai-api.onrender.com
+        sync: false
