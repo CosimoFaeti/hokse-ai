@@ -26,9 +26,7 @@ The backend is a **FastAPI** async API. The frontend is a **Streamlit** chat UI.
 The codebase follows **Clean Architecture** — dependencies only flow inward:
 
 ```
-presentation  →  application  →  infrastructure
-                                 persistence
-                                 domain
+presentation  →  application  →  infrastructure / persistence → domain
 ```
 
 | Layer | Responsibility |
@@ -180,45 +178,6 @@ docker compose down -v       # stop containers and delete MongoDB data
 
 ---
 
-## Running locally without Docker
-
-Use this approach for faster iteration during development. You need MongoDB running separately (Docker, local install, or MongoDB Atlas).
-
-### 1. Export environment variables
-
-**Linux / macOS:**
-```shell
-export $(grep -v '^#' .env | xargs)
-```
-
-**Windows (PowerShell):**
-```powershell
-Get-Content .env | Where-Object { $_ -notmatch '^#' -and $_ -match '=' } | ForEach-Object {
-    $k, $v = $_ -split '=', 2
-    [System.Environment]::SetEnvironmentVariable($k.Trim(), $v.Trim())
-}
-```
-
-### 2. Start Ollama
-
-```shell
-ollama serve
-```
-
-### 3. Start the API
-
-```shell
-uv run python main.py
-```
-
-### 4. Start the UI (separate terminal)
-
-```shell
-uv run streamlit run ui/app.py
-```
-
----
-
 ## Deploying to Render (cloud)
 
 The project includes a `render.yaml` Blueprint that creates both services automatically.
@@ -277,18 +236,6 @@ API_PUBLIC_URL=https://hokse-ai-api.onrender.com
 Trigger a manual deploy on both services. Once the API shows **Live**, open `https://hokse-ai-ui.onrender.com`.
 
 > **Free tier note:** Render free services spin down after 15 minutes of inactivity. The first request after a spin-down can take up to 60 seconds.
-
----
-
-## LLM provider reference
-
-| Provider | Cost | Setup | Best for |
-|----------|------|-------|----------|
-| Ollama (`llama3.2`) | Free | Install Ollama, `ollama pull llama3.2` | Local development |
-| Ollama (`llama3.1:8b`) | Free | Install Ollama, `ollama pull llama3.1:8b` | Local, better quality |
-| Google Gemini (`gemini-2.0-flash-lite`) | Paid | Google AI Studio API key | Cloud deployment |
-
-Switch provider by changing `LLM_PROVIDER` and `LLM_MODEL` in `.env`.
 
 ---
 
