@@ -37,7 +37,6 @@ services:
         sync: false
 
       # Strava OAuth
-      # IMPORTANT: set STRAVA_REDIRECT_URI to https://<your-api>.onrender.com/auth/callback
       - key: STRAVA_CLIENT_ID
         sync: false
       - key: STRAVA_CLIENT_SECRET
@@ -49,13 +48,13 @@ services:
       - key: STRAVA_API_URL
         value: https://www.strava.com/api/v3
       - key: STRAVA_REDIRECT_URI
-        sync: false   # set to: https://hokse-ai-api.onrender.com/auth/callback
+        sync: https://hokse-ai-api.onrender.com/auth/callback # Local: false
       - key: STRAVA_SCOPE
         value: activity:read_all
 
       # UI redirect after OAuth — point to the UI service URL
       - key: UI_HOST
-        sync: false   # set to: hokse-ai-ui.onrender.com
+        sync: hokse-ai-ui.onrender.com # Local: false
       - key: UI_PORT
         value: "443"
 
@@ -68,6 +67,6 @@ services:
     buildCommand: pip install uv && uv sync
     startCommand: uv run streamlit run ui/app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
     envVars:
-      # Point the UI at the deployed API — set to https://hokse-ai-api.onrender.com
+      # Point the UI at the deployed API
       - key: API_BASE_URL
-        sync: false   # set to: https://hokse-ai-api.onrender.com
+        sync: https://hokse-ai-api.onrender.com # Local: false
