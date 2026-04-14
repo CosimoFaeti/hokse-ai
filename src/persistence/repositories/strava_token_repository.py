@@ -18,7 +18,7 @@ class StravaTokenRepository:
 		logger.info(msg="Start")
 
 		results = await StravaToken.find_all().to_list()
-		athlete_ids: list[int] = [r.athlete_id for r in results]
+		athlete_ids: list[int] = list({r.athlete_id for r in results})
 
 		logger.info(msg="End")
 
@@ -31,7 +31,9 @@ class StravaTokenRepository:
 
 		logger.info(msg="Start")
 
-		result = await StravaToken.find_one(StravaToken.athlete_id == athlete_id)
+		result = await StravaToken.find(
+			StravaToken.athlete_id == athlete_id
+		).sort(-StravaToken.upload_date).first_or_none()
 
 		if result is None:
 			logger.error(msg=f"Entry of type strava token with key={athlete_id} does not exist.")
@@ -59,7 +61,6 @@ class StravaTokenRepository:
 		logger.info(msg="Start")
 
 		nosql_strava_token: StravaToken = StravaToken(**token.model_dump())
-
 		await nosql_strava_token.insert()
 
 		logger.info(msg="End")

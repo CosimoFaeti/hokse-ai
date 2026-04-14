@@ -95,18 +95,6 @@ st.divider()
 # region CHAT
 st.markdown("### Ask your coach")
 
-SUGGESTIONS = [
-    "Am I overtraining?",
-    "How does this week compare to last week?",
-    "What's my pace trend over the last 8 weeks?",
-    "Give me a summary of my last 10 activities.",
-]
-
-cols = st.columns(2)
-for i, prompt in enumerate(SUGGESTIONS):
-    if cols[i % 2].button(prompt, key=f"sug_{i}", use_container_width=True):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
@@ -122,7 +110,7 @@ if user_input := st.chat_input("Ask about your training..."):
                 r = httpx.post(
                     url=f"{API_BASE}/agent/chat",
                     json={"athlete_id": athlete_id, "message": user_input},
-                    timeout=60,
+                    timeout=180,
                 )
                 reply = r.json().get("message", "No response.")
             except Exception as e:
