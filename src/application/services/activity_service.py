@@ -10,69 +10,80 @@ from src.application.repositories.i_activity_repository import IActivityReposito
 
 
 class ActivityService(IActivityService):
-    """"""
+	""""""
 
-    def __init__(self, activity_repository: IActivityRepository, strava_client: IStravaClient, auth_service: IAuthService):
-        self.activity_repository = activity_repository
-        self.strava_client = strava_client
-        self.auth_service = auth_service
+	def __init__(
+		self, activity_repository: IActivityRepository, strava_client: IStravaClient, auth_service: IAuthService
+	):
+		self.activity_repository = activity_repository
+		self.strava_client = strava_client
+		self.auth_service = auth_service
 
-    # region POST
-    @exception_handler
-    async def sync(self, athlete_id: int, pages: int) -> Result[list[ActivityEntity]]:
-        """"""
-        logger.info(msg="Start")
-        logger.debug(msg=f"Syncing activities for athlete {athlete_id} - pages {pages}")
+	# region POST
+	@exception_handler
+	async def sync(self, athlete_id: int, pages: int) -> Result[list[ActivityEntity]]:
+		""""""
+		logger.info(msg="Start")
+		logger.debug(msg=f"Syncing activities for athlete {athlete_id} - pages {pages}")
 
-        result_token: Result[StravaTokenEntity] = await self.auth_service.get_valid_token(athlete_id=athlete_id)
+		result_token: Result[StravaTokenEntity] = await self.auth_service.get_valid_token(athlete_id=athlete_id)
 
-        if result_token.failed:
-            logger.error(msg="An error occurred while getting valid token")
-            return Result.fail(error=result_token.error)
+		if result_token.failed:
+			logger.error(msg="An error occurred while getting valid token")
+			return Result.fail(error=result_token.error)
 
-        all_activities: list[ActivityEntity] = []
+		all_activities: list[ActivityEntity] = []
 
-        for page in range(1, pages + 1):
-            result_activities: Result[list[ActivityEntity]] = await self.strava_client.get_activities(athlete_id=athlete_id, per_page=100, page=page)
+		for page in range(1, pages + 1):
+			result_activities: Result[list[ActivityEntity]] = await self.strava_client.get_activities(
+				athlete_id=athlete_id, per_page=100, page=page
+			)
 
-            if result_activities.failed:
-                logger.error(msg="An error occurred while getting activities")
-                return Result.fail(error=result_activities.error)
+			if result_activities.failed:
+				logger.error(msg="An error occurred while getting activities")
+				return Result.fail(error=result_activities.error)
 
-            batch = result_activities.value
+			batch = result_activities.value
 
-            all_activities.extend(batch)
+			all_activities.extend(batch)
 
-        if all_activities:
-            result_upsert: Result[list[ActivityEntity]] = await self.activity_repository.post(activities=all_activities)
+		if all_activities:
+			result_upsert: Result[list[ActivityEntity]] = await self.activity_repository.post(activities=all_activities)
 
-            if result_upsert.failed:
-                logger.error(msg="An error occurred while posting activities")
-                return Result.fail(error=result_upsert.error)
+			if result_upsert.failed:
+				logger.error(msg="An error occurred while posting activities")
+				return Result.fail(error=result_upsert.error)
 
-        logger.info(msg="End")
-        logger.debug(msg=f"Synced {len(all_activities)} activities.")
+		logger.info(msg="End")
+		logger.debug(msg=f"Synced {len(all_activities)} activities.")
 
-        return Result.ok(value=all_activities)
-    # endregion
+		return Result.ok(value=all_activities)
 
-    # region GET
-    @exception_handler
-    async def get(self, athlete_id: int, sport_type: str | None, limit: int, start: str, end: str) -> Result[list[ActivityEntity]]:
-        """"""
-        logger.info(msg="Start")
-        logger.debug(msg=f"Getting activities for athlete {athlete_id} - sport type {sport_type} - limit {limit} - start {start} - end {end}")
+	# endregion
 
-        result_get: Result[list[ActivityEntity]] = await self.activity_repository.get(athlete_id=athlete_id, sport_type=sport_type, limit=limit, start=start)
+	# region GET
+	@exception_handler
+	async def get(
+		self, athlete_id: int, sport_type: str | None, limit: int, start: str, end: str
+	) -> Result[list[ActivityEntity]]:
+		""""""
+		logger.info(msg="Start")
+		logger.debug(
+			msg=f"Getting activities for athlete {athlete_id} - sport type {sport_type} - limit {limit} - start {start} - end {end}"
+		)
 
-        if result_get.failed:
-            logger.error(msg="An error occurred while getting activities")
-            return Result.fail(error=result_get.error)
+		result_get: Result[list[ActivityEntity]] = await self.activity_repository.get(
+			athlete_id=athlete_id, sport_type=sport_type, limit=limit, start=start
+		)
 
-        activities: list[ActivityEntity] = result_get.value
+		if result_get.failed:
+			logger.error(msg="An error occurred while getting activities")
+			return Result.fail(error=result_get.error)
 
-        logger.info(msg="End")
+		activities: list[ActivityEntity] = result_get.value
 
-        return Result.ok(value=activities)
-    # endregion
+		logger.info(msg="End")
 
+		return Result.ok(value=activities)
+
+	# endregion

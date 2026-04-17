@@ -19,18 +19,10 @@ POST_SYNC_RESPONSE_EXAMPLES = {
 	},
 	422: {
 		"description": "Validation error.",
-		"content": {
-			"application/json": {
-				"example": {"detail": "Validation error."}
-			}
-		},
+		"content": {"application/json": {"example": {"detail": "Validation error."}}},
 	},
 	500: {
 		"description": "Internal server error.",
-		"content": {
-			"application/json": {
-				"example": {"detail": "Internal server error."}
-			}
-		},
+		"content": {"application/json": {"example": {"detail": "Internal server error."}}},
 	},
 }

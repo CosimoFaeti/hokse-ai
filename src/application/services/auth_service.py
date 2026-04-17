@@ -8,94 +8,97 @@ from src.application.repositories.i_strava_token_repository import IStravaTokenR
 
 
 class AuthService(IAuthService):
-    """Forwards requests to Strava token repository and Strava client."""
+	"""Forwards requests to Strava token repository and Strava client."""
 
-    def __init__(self, strava_token_repository: IStravaTokenRepository, strava_client: IStravaClient):
-        self.strava_token_repository = strava_token_repository
-        self.strava_client = strava_client
+	def __init__(self, strava_token_repository: IStravaTokenRepository, strava_client: IStravaClient):
+		self.strava_token_repository = strava_token_repository
+		self.strava_client = strava_client
 
-    # region POST
-    @exception_handler
-    async def exchange_code(self, code: str) -> Result[StravaTokenEntity]:
-        """"""
-        logger.info(msg="Start")
+	# region POST
+	@exception_handler
+	async def exchange_code(self, code: str) -> Result[StravaTokenEntity]:
+		""""""
+		logger.info(msg="Start")
 
-        result_exchange_code: Result[StravaTokenEntity] = await self.strava_client.exchange_code(code=code)
+		result_exchange_code: Result[StravaTokenEntity] = await self.strava_client.exchange_code(code=code)
 
-        if result_exchange_code.failed:
-            logger.error(msg="An error occurred while exchange code.")
-            return Result.fail(error=result_exchange_code.error)
+		if result_exchange_code.failed:
+			logger.error(msg="An error occurred while exchange code.")
+			return Result.fail(error=result_exchange_code.error)
 
-        token: StravaTokenEntity = result_exchange_code.value
+		token: StravaTokenEntity = result_exchange_code.value
 
-        await self.strava_token_repository.post(token=token)
+		await self.strava_token_repository.post(token=token)
 
-        logger.debug(msg=f"Token exchanged and upserted for athlete_id={token.athlete_id}")
-        logger.info(msg="End")
+		logger.debug(msg=f"Token exchanged and upserted for athlete_id={token.athlete_id}")
+		logger.info(msg="End")
 
-        return Result.ok(value=token)
-    # endregion
+		return Result.ok(value=token)
 
-    # region GET
-    @exception_handler
-    async def get_valid_token(self, athlete_id: int) -> Result[StravaTokenEntity]:
-        """"""
-        logger.info(msg="Start")
-        logger.debug(msg=f"Getting valid token for athlete_id={athlete_id}")
+	# endregion
 
-        result_get_token: Result[StravaTokenEntity] = await self.strava_token_repository.get(athlete_id=athlete_id)
+	# region GET
+	@exception_handler
+	async def get_valid_token(self, athlete_id: int) -> Result[StravaTokenEntity]:
+		""""""
+		logger.info(msg="Start")
+		logger.debug(msg=f"Getting valid token for athlete_id={athlete_id}")
 
-        if result_get_token.failed:
-            logger.error(msg="An error occurred while getting valid token.")
-            return Result.fail(error=result_get_token.error)
+		result_get_token: Result[StravaTokenEntity] = await self.strava_token_repository.get(athlete_id=athlete_id)
 
-        token: StravaTokenEntity = result_get_token.value
+		if result_get_token.failed:
+			logger.error(msg="An error occurred while getting valid token.")
+			return Result.fail(error=result_get_token.error)
 
-        if token.refresh():
-            logger.debug(msg="Refreshing token.")
-            result_refresh_token: Result[StravaTokenEntity] = await self._refresh_token(token)
-            token: StravaTokenEntity = result_refresh_token.value
+		token: StravaTokenEntity = result_get_token.value
 
-        logger.info(msg="End")
+		if token.refresh():
+			logger.debug(msg="Refreshing token.")
+			result_refresh_token: Result[StravaTokenEntity] = await self._refresh_token(token)
+			token: StravaTokenEntity = result_refresh_token.value
 
-        return Result.ok(value=token)
-    # endregion
+		logger.info(msg="End")
 
-    # region DELETE
-    @exception_handler
-    async def revoke(self, athlete_id: int) -> Result[StravaTokenEntity]:
-        """"""
-        logger.info(msg="Start")
-        logger.debug(msg=f"Revoking token for athlete_id={athlete_id}")
+		return Result.ok(value=token)
 
-        result_revoke: Result[StravaTokenEntity] = await self.strava_token_repository.delete(athlete_id=athlete_id)
+	# endregion
 
-        if result_revoke.failed:
-            logger.error(msg="An error occurred while revoking token.")
-            return Result.fail(error=result_revoke.error)
+	# region DELETE
+	@exception_handler
+	async def revoke(self, athlete_id: int) -> Result[StravaTokenEntity]:
+		""""""
+		logger.info(msg="Start")
+		logger.debug(msg=f"Revoking token for athlete_id={athlete_id}")
 
-        token: StravaTokenEntity = result_revoke.value
+		result_revoke: Result[StravaTokenEntity] = await self.strava_token_repository.delete(athlete_id=athlete_id)
 
-        logger.info(msg="End")
+		if result_revoke.failed:
+			logger.error(msg="An error occurred while revoking token.")
+			return Result.fail(error=result_revoke.error)
 
-        return Result.ok(value=token)
-    # endregion
+		token: StravaTokenEntity = result_revoke.value
 
-    # Private
-    @exception_handler
-    async def _refresh_token(self, token: StravaTokenEntity) -> Result[StravaTokenEntity]:
-        """"""
-        logger.debug(msg=f"Refreshing token for athlete_id={token.athlete_id}")
+		logger.info(msg="End")
 
-        result_refresh_token: Result[StravaTokenEntity] = await self.strava_client.refresh_token(token=token)
+		return Result.ok(value=token)
 
-        if result_refresh_token.failed:
-            logger.error(msg="An error occurred while refreshing token.")
-            return Result.fail(error=result_refresh_token.error)
+	# endregion
 
-        refreshed_token: StravaTokenEntity = result_refresh_token.value
+	# Private
+	@exception_handler
+	async def _refresh_token(self, token: StravaTokenEntity) -> Result[StravaTokenEntity]:
+		""""""
+		logger.debug(msg=f"Refreshing token for athlete_id={token.athlete_id}")
 
-        await self.strava_token_repository.post(token=refreshed_token)
+		result_refresh_token: Result[StravaTokenEntity] = await self.strava_client.refresh_token(token=token)
 
-        logger.info(msg="End")
-        return Result.ok(value=refreshed_token)
+		if result_refresh_token.failed:
+			logger.error(msg="An error occurred while refreshing token.")
+			return Result.fail(error=result_refresh_token.error)
+
+		refreshed_token: StravaTokenEntity = result_refresh_token.value
+
+		await self.strava_token_repository.post(token=refreshed_token)
+
+		logger.info(msg="End")
+		return Result.ok(value=refreshed_token)

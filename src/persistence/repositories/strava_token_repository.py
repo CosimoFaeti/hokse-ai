@@ -31,9 +31,9 @@ class StravaTokenRepository:
 
 		logger.info(msg="Start")
 
-		result = await StravaToken.find(
-			StravaToken.athlete_id == athlete_id
-		).sort(-StravaToken.upload_date).first_or_none()
+		result = (
+			await StravaToken.find(StravaToken.athlete_id == athlete_id).sort(-StravaToken.upload_date).first_or_none()
+		)
 
 		if result is None:
 			logger.error(msg=f"Entry of type strava token with key={athlete_id} does not exist.")
@@ -50,6 +50,7 @@ class StravaTokenRepository:
 		)
 
 		return Result.ok(value=strava_token)
+
 	# endregion
 
 	# region POST
@@ -66,6 +67,7 @@ class StravaTokenRepository:
 		logger.info(msg="End")
 
 		return Result.ok(value=token)
+
 	# endregion
 
 	# region DELETE
@@ -89,4 +91,5 @@ class StravaTokenRepository:
 		logger.info(msg="End")
 
 		return Result.ok(value=strava_token)
+
 	# endregion

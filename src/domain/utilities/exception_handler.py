@@ -18,6 +18,7 @@ def exception_handler(func):
 	"""
 
 	if asyncio.iscoroutinefunction(func):
+
 		@functools.wraps(func)
 		async def inner_function(*args, **kwargs):
 			try:
@@ -26,6 +27,7 @@ def exception_handler(func):
 				logger.error(msg=f"An generic error occurred in {func.__name__}. Details: {str(e)}")
 				return Result.fail(error=GenericErrors.generic_error(details=str(e)))
 	else:
+
 		@functools.wraps(func)
 		def inner_function(*args, **kwargs):
 			try:

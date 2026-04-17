@@ -7,6 +7,7 @@ from src.domain.utilities.singleton import Singleton
 from src.persistence.objects.nosql_activity import Activity
 from src.persistence.objects.nosql_strava_token import StravaToken
 
+
 class NoSQLDatabaseManager(metaclass=Singleton):
 	"""
 	Utility class to manage connection to NoSQL database connection.

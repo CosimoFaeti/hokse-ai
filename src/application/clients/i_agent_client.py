@@ -5,7 +5,6 @@ from src.domain.results.result import Result
 
 
 class IAgentClient(ABC):
-
-    @abstractmethod
-    async def invoke(self, message: str, athlete_id: int) -> Result[ChatEntity]:
-        pass
+	@abstractmethod
+	async def invoke(self, message: str, athlete_id: int) -> Result[ChatEntity]:
+		pass

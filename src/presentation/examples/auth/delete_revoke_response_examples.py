@@ -12,10 +12,6 @@ DELETE_REVOKE_RESPONSE_EXAMPLES = {
 	},
 	500: {
 		"description": "Internal server error.",
-		"content": {
-			"application/json": {
-				"example": {"detail": "Failed to revoke token."}
-			}
-		},
+		"content": {"application/json": {"example": {"detail": "Failed to revoke token."}}},
 	},
 }

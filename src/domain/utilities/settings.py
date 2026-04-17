@@ -12,7 +12,9 @@ class Settings(BaseSettings):
 	API_PORT: int = Field(title="PORT", description="Port on which the microservice is exposed.", default=8000)
 
 	API_BASE_URL: str | None = Field(
-		title="API_BASE_URL", description="Full base URL for the API (overrides API_HOST+API_PORT, used for deployments like Render).", default=None
+		title="API_BASE_URL",
+		description="Full base URL for the API (overrides API_HOST+API_PORT, used for deployments like Render).",
+		default=None,
 	)
 
 	LOG_LEVEL: Literal["debug", "info", "warning", "error"] = Field(
@@ -35,7 +37,6 @@ class Settings(BaseSettings):
 
 	NOSQL_DB_PASSWORD: SecretStr = Field(
 		title="NOSQL_DB_PASSWORD", description="Password for NOSQL database.", default=None
-
 	)
 
 	NOSQL_DB_NAME: str | None = Field(
@@ -46,24 +47,15 @@ class Settings(BaseSettings):
 
 	# region AI
 
-	LLM_PROVIDER: str = Field(
-		title="LLM_PROVIDER", description="Provider for LLM API.", default="google"
-	)
+	LLM_PROVIDER: str = Field(title="LLM_PROVIDER", description="Provider for LLM API.", default="google")
 
-	LLM_MODEL: str = Field(
-		title="LLM_MODEL", description="Model for accessing LLM API.", default="")
+	LLM_MODEL: str = Field(title="LLM_MODEL", description="Model for accessing LLM API.", default="")
 
-	LLM_API_KEY: str | None = Field(
-		title="LLM_API_KEY", description="API key for LLM API.", default=None
-	)
+	LLM_API_KEY: str | None = Field(title="LLM_API_KEY", description="API key for LLM API.", default=None)
 
-	LLM_HOST: str | None = Field(
-		title="LLM_HOST", description="Host for LLM API.", default=None
-	)
+	LLM_HOST: str | None = Field(title="LLM_HOST", description="Host for LLM API.", default=None)
 
-	LLM_PORT: int | None = Field(
-		title="LLM_PORT", description="Port for LLM API.", default=None
-	)
+	LLM_PORT: int | None = Field(title="LLM_PORT", description="Port for LLM API.", default=None)
 
 	# endregion
 
@@ -101,13 +93,9 @@ class Settings(BaseSettings):
 
 	# region UI
 
-	UI_HOST: str | None = Field(
-		title="UI_HOST", description="Host on which the UI is running.", default="localhost"
-	)
+	UI_HOST: str | None = Field(title="UI_HOST", description="Host on which the UI is running.", default="localhost")
 
-	UI_PORT: int | None = Field(
-		title="UI_PORT", description="Port on which the UI is exposed.", default=8501
-	)
+	UI_PORT: int | None = Field(title="UI_PORT", description="Port on which the UI is exposed.", default=8501)
 
 	# endregion
 

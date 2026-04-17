@@ -2,5 +2,6 @@ from pydantic import BaseModel
 
 
 class GetStatusInputDTO(BaseModel):
-    """"""
-    athlete_id: int
+	""""""
+
+	athlete_id: int

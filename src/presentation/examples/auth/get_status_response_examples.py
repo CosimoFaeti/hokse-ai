@@ -14,10 +14,6 @@ GET_STATUS_RESPONSE_EXAMPLES = {
 	},
 	422: {
 		"description": "Validation error.",
-		"content": {
-			"application/json": {
-				"example": {"detail": "Validation error."}
-			}
-		},
+		"content": {"application/json": {"example": {"detail": "Validation error."}}},
 	},
 }

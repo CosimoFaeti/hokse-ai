@@ -9,57 +9,63 @@ from src.persistence.objects.nosql_activity import Activity
 
 
 class ActivityRepository:
-    """Repository to perform operations on activity NoSQL collection."""
+	"""Repository to perform operations on activity NoSQL collection."""
 
-    # region GET
-    @staticmethod
-    @exception_handler
-    async def get(athlete_id: int | None, sport_type: str | None = None, limit: int = 10, start: str | None = None, end: str | None = None) -> Result[list[ActivityEntity]]:
-        """"""
+	# region GET
+	@staticmethod
+	@exception_handler
+	async def get(
+		athlete_id: int | None,
+		sport_type: str | None = None,
+		limit: int = 10,
+		start: str | None = None,
+		end: str | None = None,
+	) -> Result[list[ActivityEntity]]:
+		""""""
 
-        logger.info(msg="Start")
+		logger.info(msg="Start")
 
-        result = Activity.find(Activity.athlete_id == athlete_id)
+		result = Activity.find(Activity.athlete_id == athlete_id)
 
-        if sport_type:
-            result = result.find(Activity.sport_type == sport_type)
+		if sport_type:
+			result = result.find(Activity.sport_type == sport_type)
 
-        if start and end:
-            start_dt = datetime.fromisoformat(start)
-            end_dt = datetime.fromisoformat(end)
-            result = result.find(
-                Activity.start_date >= start_dt,
-                Activity.start_date <= end_dt,
-            )
+		if start and end:
+			start_dt = datetime.fromisoformat(start)
+			end_dt = datetime.fromisoformat(end)
+			result = result.find(
+				Activity.start_date >= start_dt,
+				Activity.start_date <= end_dt,
+			)
 
-        if result is None:
-            logger.error(msg=f"Entry of type activity with key={athlete_id} does not exist.")
-            return Result.fail(error=GenericErrors.not_found_error(type="activity", key=str(athlete_id)))
+		if result is None:
+			logger.error(msg=f"Entry of type activity with key={athlete_id} does not exist.")
+			return Result.fail(error=GenericErrors.not_found_error(type="activity", key=str(athlete_id)))
 
-        logger.info(msg="End")
+		logger.info(msg="End")
 
-        docs = await result.sort(-Activity.start_date).limit(limit).to_list()
+		docs = await result.sort(-Activity.start_date).limit(limit).to_list()
 
-        activities: list[ActivityEntity] = [ActivityEntity(**doc.model_dump()) for doc in docs]
+		activities: list[ActivityEntity] = [ActivityEntity(**doc.model_dump()) for doc in docs]
 
-        return Result.ok(value=activities)
+		return Result.ok(value=activities)
 
-    # endregion
+	# endregion
 
-    # region POST
-    @staticmethod
-    @exception_handler
-    async def post(activities: list[ActivityEntity]) -> Result[list[ActivityEntity]]:
-        """"""
+	# region POST
+	@staticmethod
+	@exception_handler
+	async def post(activities: list[ActivityEntity]) -> Result[list[ActivityEntity]]:
+		""""""
 
-        logger.info(msg="Start")
+		logger.info(msg="Start")
 
-        docs = [Activity(**activity.model_dump()) for activity in activities]
+		docs = [Activity(**activity.model_dump()) for activity in activities]
 
-        await Activity.insert_many(docs)
+		await Activity.insert_many(docs)
 
-        logger.info(msg="End")
+		logger.info(msg="End")
 
-        return Result.ok(value=activities)
+		return Result.ok(value=activities)
 
-    # endregion
+	# endregion

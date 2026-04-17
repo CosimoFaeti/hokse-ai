@@ -20,54 +20,58 @@ from src.presentation.mappers.agent.post_sync_mappers import PostSyncMappers
 
 agent_router = APIRouter(prefix="/agent", tags=["Agent"])
 
+
 # region POST
 @agent_router.post(
-    path="/chat",
-    summary="Create a new chat.",
-    description="Create a new chat.",
-    status_code=201,
-    responses=POST_CHAT_RESPONSE_EXAMPLES,
+	path="/chat",
+	summary="Create a new chat.",
+	description="Create a new chat.",
+	status_code=201,
+	responses=POST_CHAT_RESPONSE_EXAMPLES,
 )
 async def chat(
-        dto: PostChatInputDTO = Body(examples=POST_CHAT_BODY_EXAMPLES),
-        agent_service: IAgentService = Depends(get_agent_service)
+	dto: PostChatInputDTO = Body(examples=POST_CHAT_BODY_EXAMPLES),
+	agent_service: IAgentService = Depends(get_agent_service),
 ) -> PostChatOutputDTO:
-    """"""
-    logger.info(msg="Calling POST /chat")
+	""""""
+	logger.info(msg="Calling POST /chat")
 
-    result: Result[ChatEntity] = await agent_service.run(message=dto.message, athlete_id=dto.athlete_id)
+	result: Result[ChatEntity] = await agent_service.run(message=dto.message, athlete_id=dto.athlete_id)
 
-    if result.failed:
-        raise HTTPException(detail=result.error.message, status_code=result.error.status_code)
+	if result.failed:
+		raise HTTPException(detail=result.error.message, status_code=result.error.status_code)
 
-    output: PostChatOutputDTO = PostChatMappers.to_dto(entity=result.value)
+	output: PostChatOutputDTO = PostChatMappers.to_dto(entity=result.value)
 
-    logger.info(msg="Successfully returning from POST /chat")
+	logger.info(msg="Successfully returning from POST /chat")
 
-    return output
+	return output
+
 
 @agent_router.post(
-    path="/sync",
-    summary="Create a new sync.",
-    description="Create a new sync.",
-    status_code=201,
-    responses=POST_SYNC_RESPONSE_EXAMPLES,
+	path="/sync",
+	summary="Create a new sync.",
+	description="Create a new sync.",
+	status_code=201,
+	responses=POST_SYNC_RESPONSE_EXAMPLES,
 )
 async def sync(
-        dto: PostSyncInputDTO = Body(examples=POST_SYNC_BODY_EXAMPLES),
-        activity_service: IActivityService = Depends(get_activity_service),
+	dto: PostSyncInputDTO = Body(examples=POST_SYNC_BODY_EXAMPLES),
+	activity_service: IActivityService = Depends(get_activity_service),
 ) -> list[PostSyncOutputDTO]:
-    """"""
-    logger.info(msg="Calling POST /sync")
+	""""""
+	logger.info(msg="Calling POST /sync")
 
-    result: Result[list[ActivityEntity]] = await activity_service.sync(athlete_id=dto.athlete_id, pages=dto.pages)
+	result: Result[list[ActivityEntity]] = await activity_service.sync(athlete_id=dto.athlete_id, pages=dto.pages)
 
-    if result.failed:
-        raise HTTPException(detail=result.error.message, status_code=result.error.status_code)
+	if result.failed:
+		raise HTTPException(detail=result.error.message, status_code=result.error.status_code)
 
-    output: list[PostSyncOutputDTO] = [PostSyncMappers.to_dto(entity=entity) for entity in result.value]
+	output: list[PostSyncOutputDTO] = [PostSyncMappers.to_dto(entity=entity) for entity in result.value]
 
-    logger.info(msg="Successfully returning from POST /sync")
+	logger.info(msg="Successfully returning from POST /sync")
 
-    return output
+	return output
+
+
 # endregion
