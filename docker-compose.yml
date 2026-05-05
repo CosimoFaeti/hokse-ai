@@ -65,7 +65,9 @@ services:
   ui:
     build:
       context: .
-      dockerfile: docker/dockerfile-ui
+      dockerfile: docker/dockerfile-ui-ts
+      args:
+        VITE_API_URL: http://localhost:${API_PORT}
     container_name: ui
     hostname: ui
     networks:
@@ -73,13 +75,8 @@ services:
     depends_on:
       - api
     ports:
-      - "$UI_PORT:$UI_PORT"
-    environment:
-      - UI_HOST
-      - UI_PORT
-      - API_HOST=api
-      - API_PORT
-      - API_PUBLIC_URL=http://localhost:${API_PORT}
+      - "${UI_PORT}:80"
+
 
 networks:
   hokse-ai-network:
